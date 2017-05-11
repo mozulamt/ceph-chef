@@ -44,6 +44,11 @@
 # NOTE: dmcrypt Ceph OSD uuid type 4fbd7e29-9d25-41b8-afd0-5ec00ceff05d
 # NOTE: Ceph Journal uuid type 45b0969e-9b03-4f30-b4c6-b4b80ceff106
 # NOTE: dmcrypt Ceph Journal uuid type 45b0969e-9b03-4f30-b4c6-5ec00ceff106
+#
+GPT_UUID_TYPE_CEPH_OSD_PLAIN = '4fbd7e29-9d25-41b8-afd0-062c0ceff05d'
+GPT_UUID_TYPE_CEPH_OSD_DMCRYPT = '4fbd7e29-9d25-41b8-afd0-5ec00ceff05d'
+GPT_UUID_TYPE_CEPH_JOURNAL_PLAIN = '45b0969e-9b03-4f30-b4c6-b4b80ceff106'
+GPT_UUID_TYPE_CEPH_JOURNAL_DMCRYPT = '45b0969e-9b03-4f30-b4c6-5ec00ceff106'
 
 include_recipe 'ceph-chef'
 include_recipe 'ceph-chef::osd_install'
@@ -109,11 +114,12 @@ if node['ceph']['osd']['devices']
   devices = Hash[(0...devices.size).zip devices] unless devices.is_a? Hash
 
   devices.each do |index, osd_device|
-    # Only one partition by default for ceph data
-    partitions = 1
-
     if !node['ceph']['osd']['devices'][index]['status'].nil? && node['ceph']['osd']['devices'][index]['status'] == 'deployed'
       Log.info("osd: osd device '#{osd_device}' has already been setup.")
+      next
+    end
+    if node['ceph']['osd']['devices'][index]['data'].nil? || node['ceph']['osd']['devices'][index]['journal'].nil?
+      Log.warn("osd: osd device '#{osd_device}' missing data & journal attributes")
       next
     end
 
@@ -121,27 +127,61 @@ if node['ceph']['osd']['devices']
     # IMPORTANT: More work needs to be done on solid key management for very high security environments.
     dmcrypt = osd_device['encrypted'] == true ? '--dmcrypt' : ''
 
-    # is_device - Is the device a partition or not
-    # is_ceph - Does the device contain the default 'ceph data' or 'ceph journal' label
-    # The -v option is added to the ceph-disk script so as to get a verbose output if debugging is needed. No other reason.
-    # is_ceph=$(parted --script #{osd_device['data']} print | egrep -sq '^ 1.*ceph')
+    # The proplem below is that we want to know what partition# was created (if
+    # any) by 'ceph-disk prepare'. If the disk was empty, it will probably be
+    # #1. If the disk was NOT empty, then it's the next free number. Then it's
+    # figuring out what the correct naming of the partition is. It might be
+    # just a numeric suffix, or a 'p'+suffix or '-part'+suffix.
+    #
+    # prepare takes a raw device for both data & journal and makes partitions
+    # on both as needed.
+    #
+    # list takes a raw device as well, not a partition, also drop the /dev/ prefix.
+    #
+    # activate takes a PARTITION if applicable.
+    #
+    # As a hack for now, if the device is MAYBE partitionable, try to run
+    # 'ceph-disk list' on it and take the first entry that matches 'ceph data'
+    #
+    # * Maybe partitionable defined as:
+    # - exists in /sys/block/$X/
+    # - /sys/block/$X/ext_range is >1 (TODO)
+    # - /sys/block/$X/capability does not have 0x0200 set (TODO: GENHD_FL_NO_PART_SCAN)
+    #
+    # TODO: Fix this for future things that might have more than one data
+    # volume on a disk.
+    # TODO: we do readlink for the moment to resolve symlinks, but we should
+    # resolve the rdev major/minor to get the canonical name.
+    #
+    # Other unworkable solutions:
+    # Chef resource ordering means that we'd have to try and scan the partition
+    # table below & after running ceph-disk and figure out the difference.
+    sgdisk_partitions = (1..31).to_a.map { |x| "-i#{x}" }.join(' ') # Lots of parts to check.
     execute "ceph-disk-prepare on #{osd_device['data']}" do
       command <<-EOH
-        is_device=$(echo '#{osd_device['data']}' | egrep '/dev/(([a-z]{3,4}[0-9]$)|(cciss/c[0-9]{1}d[0-9]{1}p[0-9]$))')
-        ceph-disk -v prepare --cluster #{node['ceph']['cluster']} #{dmcrypt} --fs-type #{node['ceph']['osd']['fs_type']} #{osd_device['data']} #{osd_device['journal']}
-        if [[ ! -z $is_device ]]; then
-          ceph-disk -v activate #{osd_device['data']}#{partitions}
-        else
-          ceph-disk -v activate #{osd_device['data']}
-        fi
+        data=$(readlink -f #{osd_device['data']})
+        data_nodev=${data#/dev/}
+        echo "ceph-disk BEFORE"
+        f1=$(mktemp --tmpdir ceph-disk-prepare.1.XXXXXXXXXX)
+        f2=$(mktemp --tmpdir ceph-disk-prepare.2.XXXXXXXXXX)
+        test -e /sys/block/$data_nodev && ceph-disk list $data_nodev | tee $f1
+        ceph-disk -v prepare --cluster #{node['ceph']['cluster']} #{dmcrypt} --fs-type #{node['ceph']['osd']['fs_type']} $data #{osd_device['journal']}
+        echo "ceph-disk AFTER"
+        test -e /sys/block/$data_nodev && ceph-disk list $data_nodev | tee $f2
+        # Do a trivial compare, find the only new line that matches 'ceph data'
+        test -e /sys/block/$data_nodev && dev=$(comm --nocheck-order -13 $f1 $f2 | awk '/ceph data/{print $1}')
+        test -z "${dev}" && dev=$data # fallback
+        echo "ceph-disk activate $dev"
+        ceph-disk -v activate $dev
         sleep 3
+        echo rm -f $f1 $f2
       EOH
       # NOTE: The meaning of the uuids used here are listed above
-      not_if "sgdisk -i1 #{osd_device['data']} | grep -i 4fbd7e29-9d25-41b8-afd0-062c0ceff05d" unless dmcrypt
-      not_if "sgdisk -i1 #{osd_device['data']} | grep -i 4fbd7e29-9d25-41b8-afd0-5ec00ceff05d" if dmcrypt
+      not_if "sgdisk #{sgdisk_partitions} #{osd_device['data']} | grep -i #{GPT_UUID_TYPE_CEPH_OSD_PLAIN}" unless dmcrypt
+      not_if "sgdisk #{sgdisk_partitions} #{osd_device['data']} | grep -i #{GPT_UUID_TYPE_CEPH_OSD_DMCRYPT}" if dmcrypt
       # Only if there is no 'ceph *' found in the label. The recipe os_remove_zap should be called to remove/zap
       # all devices if you are wanting to add all of the devices again (if this is not the initial setup)
-      not_if "parted --script #{osd_device['data']} print | egrep -sq '^ 1.*ceph'"
+      not_if "sgdisk --print #{osd_device['data']} | egrep -sq '^ .*ceph'"
       action :run
       notifies :create, "ruby_block[save osd_device status #{index}]", :immediately
     end

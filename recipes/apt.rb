@@ -43,6 +43,6 @@ if node['ceph']['repo']['create']
     distribution distribution_codename
     components ['main']
     key node['ceph']['debian']['extras']['repository_key']
-    only_if { node['ceph']['extras_repo'] }
+    only_if { node['ceph']['debian']['extras'] }
   end
 end

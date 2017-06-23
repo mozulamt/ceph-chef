@@ -1,5 +1,5 @@
 #
-# Author: Chris Jones <chris.jones@lambdastack.io, cjones303@bloomberg.net>
+# Author: Hans Chris Jones <chris.jones@lambdastack.io>
 # Cookbook: ceph
 #
 # Copyright 2017, Bloomberg Finance L.P.
@@ -21,7 +21,7 @@
 
 bash 'set-ceph-crush-tunables' do
   code <<-EOH
-    ceph crush tunables optimal
+    ceph osd crush tunables optimal
     ceph osd crush set-tunable straw_calc_version 2
   EOH
   ignore_failure true

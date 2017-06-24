@@ -29,7 +29,7 @@ attribute :plugin, :kind_of => String, :default => 'jerasure'
 attribute :directory, :kind_of => String, :default => '/usr/lib/ceph/erasure-code'
 # Force to override existing profile
 attribute :force, :kind_of => [TrueClass, FalseClass], :default => false
-attribute :technique, :kind_of => String, :default => ''
+attribute :technique, :kind_of => String, :default => nil
 attribute :ruleset_failure_domain, :kind_of => String, :default => nil
 attribute :ruleset_root, :kind_of => String, :default => nil
 # attribute :packet_size, :kind_of => Fixnum, :default => 2048

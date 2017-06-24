@@ -192,27 +192,13 @@
   host = <%= node['hostname'] %>
   rgw opstate ratelimit = 0
   <% if node['ceph']['pools']['radosgw']['federated_enable_regions_zones'] %>
-   <% if node['ceph']['pools']['radosgw']['federated_multisite_replication'] %>
-  rgw region = <%= inst['region'] %>
-   <% else %>
-  rgw region = <%= inst['region'] %>-<%= inst['name'] %>
-   <% end %>
-  <% if node['ceph']['version'] == 'hammer' %>
-   <% if node['ceph']['pools']['radosgw']['federated_multisite_replication'] %>
-  rgw region root pool = .<%= inst['region'] %>.rgw.root
-   <% else %>
-  rgw region root pool = .<%= inst['region'] %>-<%= inst['name'] %>.rgw.root
-   <% end %>
-  <% else %>
-   <% if node['ceph']['pools']['radosgw']['federated_multisite_replication'] %>
-  rgw zonegroup root pool = .<%= inst['region'] %>.rgw.root
-   <% else %>
-  rgw zonegroup root pool = .<%= inst['region'] %>-<%= inst['name'] %>.rgw.root
-   <% end %>
-  <% end %>
+    <% fullregion = node['ceph']['pools']['radosgw']['federated_multisite_replication'] ? inst['region'] : "#{inst['region']}-#{inst['name']}" %>
+    <% rootpoolkey = node['ceph']['version'] == 'hammer' ? 'region' : 'zonegroup' %>
+  rgw region = <%= fullregion %>
+  rgw <%= rootpoolkey %> root pool = .<%= fullregion %>.rgw.root
   rgw zone = <%= inst['region'] %>-<%= inst['name'] %>
   rgw zone root pool = .<%= inst['region'] %>-<%= inst['name'] %>.rgw.root
-  <% end %>
+  <% end # federated_enable_regions_zones %>
   <% if node['ceph']['pools']['radosgw']['federated_multisite_replication'] %>
   keyring = /etc/ceph/$cluster.client.radosgw.keyring
   <% else %>

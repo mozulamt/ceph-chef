@@ -196,14 +196,14 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         command <<-EOH
           sudo radosgw-admin region set --infile #{region_file} --rgw-region #{region} --name client.radosgw.#{inst['region']}-#{inst['name']}
         EOH
-        # not_if "sudo radosgw-admin region list --name client.radosgw.#{inst['region']}-#{inst['name']} | grep #{inst['region']}"
+        not_if "sudo radosgw-admin region list --name client.radosgw.#{inst['region']}-#{inst['name']} | grep #{inst['region']}"
       end
 
       execute "region-map-set-#{inst['region']}" do
         command <<-EOH
           sudo radosgw-admin region-map set --infile #{region_map_file} --rgw-region #{region} --name client.radosgw.#{inst['region']}-#{inst['name']}
         EOH
-        # not_if "sudo radosgw-admin region-map get --name client.radosgw.#{inst['region']}-#{inst['name']} | grep #{inst['region']}"
+        not_if "sudo radosgw-admin region-map get --name client.radosgw.#{inst['region']}-#{inst['name']} | grep #{inst['region']}"
       end
 
       # execute 'remove-default-region' do
@@ -222,7 +222,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         command <<-EOH
           sudo radosgw-admin zone set --rgw-zone=#{inst['region']}-#{inst['name']} --infile /etc/ceph/#{zone}-zone.json --name client.radosgw.#{inst['region']}-#{inst['name']}
         EOH
-        # not_if "sudo radosgw-admin zone list --name client.radosgw.#{inst['region']}-#{inst['name']} | grep #{inst['name']}"
+        not_if "sudo radosgw-admin zone list --name client.radosgw.#{inst['region']}-#{inst['name']} | grep #{inst['name']}"
       end
 
       execute "create-region-defaults-#{inst['region']}" do

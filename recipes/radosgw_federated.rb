@@ -129,6 +129,15 @@ if node['ceph']['pools']['radosgw']['federated_enable']
       action :nothing
     end
 
+    # Create a realm if needed
+    realm = inst['realm'] || 'gold'
+    execute "realm-create-#{inst['region']}" do
+      command <<-EOH
+        sudo radosgw-admin realm create --name client.radosgw.#{inst['region']}-#{inst['name']} --rgw-realm=#{realm} --default
+      EOH
+      not_if "sudo radosgw-admin realm list --name client.radosgw.#{inst['region']}-#{inst['name']} | grep '\"#{realm}\"'"
+    end
+
     # Add the region and zone files and remove the default root pools
     if node['ceph']['pools']['radosgw']['federated_multisite_replication'] == true
       template "/etc/ceph/#{inst['region']}-region.json" do

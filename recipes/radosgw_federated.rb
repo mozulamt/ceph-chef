@@ -36,10 +36,10 @@ base_key = "/etc/ceph/#{node['ceph']['cluster']}.client.admin.keyring"
 
 if node['ceph']['pools']['radosgw']['federated_enable']
   node['ceph']['pools']['radosgw']['federated_zone_instances'].each do |inst|
-    keyring = if node['ceph']['pools']['radosgw']['federated_multisite_replication'] == false
-                "/etc/ceph/#{node['ceph']['cluster']}.client.radosgw.#{inst['region']}-#{inst['name']}.keyring"
-              else
+    keyring = if node['ceph']['pools']['radosgw']['federated_multisite_replication']
                 "/etc/ceph/#{node['ceph']['cluster']}.client.radosgw.keyring"
+              else
+                "/etc/ceph/#{node['ceph']['cluster']}.client.radosgw.#{inst['region']}-#{inst['name']}.keyring"
               end
 
     file "/var/log/radosgw/#{node['ceph']['cluster']}.client.radosgw.#{inst['region']}-#{inst['name']}.log" do

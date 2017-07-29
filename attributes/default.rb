@@ -54,7 +54,7 @@ default['ceph']['branch'] = 'stable' # Can be stable, testing or dev.
 
 # Major release version to install or gitbuilder branch
 # Must set this outside of this cookbook!
-# default['ceph']['version'] = 'hammer'
+# default['ceph']['version'] = 'jewel'
 
 default['ceph']['init_style'] = case node['platform']
                                 when 'ubuntu'
@@ -63,16 +63,9 @@ default['ceph']['init_style'] = case node['platform']
                                   'sysvinit'
                                 end
 
-# NOTE: If the version is 'hammer' then change owner and group to 'root'
-if node['ceph']['version'] == 'hammer'
-    default['ceph']['owner'] = 'root'
-    default['ceph']['group'] = 'root'
-    default['ceph']['mode'] = 0o0755
-else
-    default['ceph']['owner'] = 'ceph'
-    default['ceph']['group'] = 'ceph'
-    default['ceph']['mode'] = 0o0750
-end
+default['ceph']['owner'] = 'ceph'
+default['ceph']['group'] = 'ceph'
+default['ceph']['mode'] = 0o0750
 
 # Override these in your environment file or here if you wish. Don't put them in the 'ceph''config''global' section.
 # The public and cluster network settings are critical for proper operations.

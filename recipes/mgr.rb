@@ -19,7 +19,7 @@ include_recipe 'ceph-chef'
 
 # NOTE: Only run this recipe after Ceph is running and only on Mon nodes.
 
-if node['ceph']['version'] != 'hammer' && node['ceph']['mgr']['enable']
+if node['ceph']['mgr']['enable']
   # NOTE: Ceph sets up structure automatically so the only thing needed is to enable and start the service
 
   # cluster = node['ceph']['cluster']

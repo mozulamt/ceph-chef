@@ -23,20 +23,6 @@ end
 
 platform_family = node['platform_family']
 
-if node['ceph']['version'] == 'hammer'
-  case platform_family
-  when 'rhel'
-    # Known issue - https://access.redhat.com/solutions/1546303
-    # 2015-10-05
-    cookbook_file '/etc/init.d/ceph-radosgw' do
-      source 'ceph-radosgw'
-      owner 'root'
-      group 'root'
-      mode '0755'
-    end
-  end
-end
-
 cookbook_file '/usr/local/bin/radosgw-admin2' do
   source 'radosgw-admin2'
   owner 'root'

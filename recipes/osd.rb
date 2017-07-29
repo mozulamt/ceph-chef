@@ -79,27 +79,6 @@ cookbook_file '/etc/ceph/scripts/ceph_journal.sh' do
   not_if { ::File.file?("/etc/ceph/scripts/ceph_journal.sh") }
 end
 
-if node['ceph']['version'] == 'hammer'
-  directory '/var/lib/ceph/bootstrap-osd' do
-    owner node['ceph']['owner']
-    group node['ceph']['group']
-    mode node['ceph']['mode']
-    recursive true
-    action :create
-    not_if { ::File.directory?("/var/lib/ceph/bootstrap-osd") }
-  end
-
-  # Default data location - do not modify
-  directory '/var/lib/ceph/osd' do
-    owner node['ceph']['owner']
-    group node['ceph']['group']
-    mode node['ceph']['mode']
-    recursive true
-    action :create
-    not_if { ::File.directory?("/var/lib/ceph/osd") }
-  end
-end
-
 include_recipe 'ceph-chef::bootstrap_osd_key'
 
 # Calling ceph-disk prepare is sufficient for deploying an OSD

@@ -36,24 +36,16 @@ if service_type == 'upstart'
     subscribes :restart, "template[/etc/ceph/#{node['ceph']['cluster']}.conf]"
   end
 else
-  if node['ceph']['version'] != 'hammer'
-    service 'ceph.target-mon' do
-      service_name 'ceph.target'
-      provider Chef::Provider::Service::Systemd
-      action [:enable, :start]
-      subscribes :restart, "template[/etc/ceph/#{node['ceph']['cluster']}.conf]"
-    end
-    service 'ceph-mon' do
-      service_name "ceph-mon@#{node['hostname']}"
-      action [:enable, :start]
-      only_if { systemd? }
-    end
-  else
-    service 'ceph' do
-      supports :restart => true, :status => true
-      action [:enable, :start]
-      subscribes :restart, "template[/etc/ceph/#{node['ceph']['cluster']}.conf]"
-    end
+  service 'ceph.target-mon' do
+    service_name 'ceph.target'
+    provider Chef::Provider::Service::Systemd
+    action [:enable, :start]
+    subscribes :restart, "template[/etc/ceph/#{node['ceph']['cluster']}.conf]"
+  end
+  service 'ceph-mon' do
+    service_name "ceph-mon@#{node['hostname']}"
+    action [:enable, :start]
+    only_if { systemd? }
   end
 end
 

@@ -34,15 +34,9 @@ if service_type == 'upstart'
     action [:stop]
   end
 else
-  if node['ceph']['version'] != 'hammer'
-    service 'ceph.target' do
-      service_name 'ceph.target'
-      provider Chef::Provider::Service::Systemd
-      action [:stop]
-    end
-  else
-    execute 'raw mon start' do
-      command 'service ceph stop mon'
-    end
+  service 'ceph.target' do
+    service_name 'ceph.target'
+    provider Chef::Provider::Service::Systemd
+    action [:stop]
   end
 end

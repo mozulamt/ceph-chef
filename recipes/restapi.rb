@@ -23,7 +23,6 @@ include_recipe 'ceph-chef'
 
 service_type = node['ceph']['mon']['init_style']
 
-# if node['ceph']['version'] == 'hammer'
 directory "/var/lib/ceph/restapi/#{node['ceph']['cluster']}-restapi" do
     owner node['ceph']['owner']
     group node['ceph']['group']
@@ -32,7 +31,6 @@ directory "/var/lib/ceph/restapi/#{node['ceph']['cluster']}-restapi" do
     action :create
     not_if { ::File.directory?("/var/lib/ceph/restapi/#{node['ceph']['cluster']}-restapi") }
 end
-# end
 
 base_key = "/etc/ceph/#{node['ceph']['cluster']}.client.admin.keyring"
 keyring = "/etc/ceph/#{node['ceph']['cluster']}.client.restapi.keyring"

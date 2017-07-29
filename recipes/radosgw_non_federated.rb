@@ -40,7 +40,7 @@ directory "/var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.gateway" do
   mode node['ceph']['mode']
   recursive true
   action :create
-  not_if "test -d /var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.gateway"
+  not_if { ::File.directory?("/var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.gateway") }
 end
 
 new_key = nil
@@ -63,14 +63,14 @@ end
 execute 'update-ceph-radosgw-secret' do
   command lazy { "sudo ceph-authtool #{keyring} --name=client.radosgw.gateway --add-key=#{new_key} --cap osd 'allow rwx' --cap mon 'allow rwx'" }
   only_if { new_key }
-  only_if "test -s #{keyring}"
+  only_if { ::File.size?("#{keyring}") }
   sensitive true if Chef::Resource::Execute.method_defined? :sensitive
 end
 
 execute 'write-ceph-radosgw-secret' do
   command lazy { "ceph-authtool #{keyring} --create-keyring --name=client.radosgw.gateway --add-key=#{new_key} --cap osd 'allow rwx' --cap mon 'allow rwx'" }
   only_if { new_key }
-  not_if "test -s #{keyring}"
+  not_if { ::File.size?("#{keyring}") }
   sensitive true if Chef::Resource::Execute.method_defined? :sensitive
 end
 
@@ -81,7 +81,7 @@ execute 'generate-client-radosgw-secret' do
   EOH
   creates keyring
   not_if { new_key }
-  not_if "test -s #{keyring}"
+  not_if { ::File.size?("#{keyring}") }
   notifies :create, 'ruby_block[save-radosgw-secret]', :immediately
   sensitive true if Chef::Resource::Execute.method_defined? :sensitive
 end
@@ -113,5 +113,5 @@ ruby_block 'radosgw-finalize' do
       ::File.open("/var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.gateway/#{ack}", 'w').close
     end
   end
-  not_if "test -f /var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.gateway/done"
+  not_if { ::File.file?("/var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.gateway/done") }
 end

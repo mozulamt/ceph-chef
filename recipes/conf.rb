@@ -32,7 +32,7 @@ include_recipe 'ceph-chef::fsid'
 directory '/etc/ceph' do
   mode node['ceph']['mode']
   action :create
-  not_if 'test -f /etc/ceph'
+  not_if { ::File.file?("/etc/ceph") }
 end
 
 cookbook_file '/usr/bin/ceph-remove-clean' do

@@ -22,5 +22,5 @@ ruby_block 'gen ceph-fsid-secret' do
     require 'securerandom'
     ceph_chef_save_fsid_secret(SecureRandom.uuid)
   end
-  not_if { ceph_chef_fsid_secret }
+  not_if { !ceph_chef_fsid_secret.nil? }
 end

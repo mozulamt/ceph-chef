@@ -30,7 +30,7 @@ directory "/var/lib/ceph/restapi/#{node['ceph']['cluster']}-restapi" do
     mode 0755
     recursive true
     action :create
-    not_if "test -d /var/lib/ceph/restapi/#{node['ceph']['cluster']}-restapi"
+    not_if { ::File.directory?("/var/lib/ceph/restapi/#{node['ceph']['cluster']}-restapi") }
 end
 # end
 
@@ -44,7 +44,7 @@ keyring = "/etc/ceph/#{node['ceph']['cluster']}.client.restapi.keyring"
 execute 'write ceph-restapi-secret' do
   command lazy { "ceph-authtool #{keyring} --create-keyring --name=client.restapi --add-key='#{node['ceph']['restapi-secret']}'" }
   only_if { ceph_chef_restapi_secret }
-  not_if "test -s #{keyring}"
+  not_if { ::File.size?("#{keyring}") }
   sensitive true if Chef::Resource::Execute.method_defined? :sensitive
 end
 
@@ -53,7 +53,7 @@ execute 'gen client-restapi-secret' do
   command lazy { "ceph auth get-or-create client.restapi osd 'allow *' mon 'allow *' -o #{keyring}" }
   creates keyring
   not_if { ceph_chef_restapi_secret }
-  not_if "test -s #{keyring}"
+  not_if { ::File.size?("#{keyring}") }
   notifies :create, 'ruby_block[save restapi_secret]', :immediately
   sensitive true if Chef::Resource::Execute.method_defined? :sensitive
 end
@@ -79,5 +79,5 @@ ruby_block 'restapi-finalize' do
       ::File.open("/var/lib/ceph/restapi/#{node['ceph']['cluster']}-restapi/#{ack}", 'w').close
     end
   end
-  not_if "test -f /var/lib/ceph/restapi/#{node['ceph']['cluster']}-restapi/done"
+  not_if { ::File.file?("/var/lib/ceph/restapi/#{node['ceph']['cluster']}-restapi/done") }
 end

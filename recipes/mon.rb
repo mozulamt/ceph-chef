@@ -61,7 +61,7 @@ if node['ceph']['version'] == 'hammer'
     mode node['ceph']['mode']
     recursive true
     action :create
-    not_if 'test -d /var/run/ceph'
+    not_if { ::File.directory?("/var/run/ceph") }
   end
 
   directory "/var/lib/ceph/mon/#{node['ceph']['cluster']}-#{node['hostname']}" do
@@ -70,7 +70,7 @@ if node['ceph']['version'] == 'hammer'
     mode node['ceph']['mode']
     recursive true
     action :create
-    not_if "test -d /var/lib/ceph/mon/#{node['ceph']['cluster']}-#{node['hostname']}"
+    not_if { ::File.directory?("/var/lib/ceph/mon/#{node['ceph']['cluster']}-#{node['hostname']}") }
   end
 
   directory '/var/lib/ceph/bootstrap-osd' do
@@ -79,7 +79,7 @@ if node['ceph']['version'] == 'hammer'
     mode node['ceph']['mode']
     recursive true
     action :create
-    not_if 'test -d /var/lib/ceph/bootstrap-osd'
+    not_if { ::File.directory?("/var/lib/ceph/bootstrap-osd") }
   end
 
   directory '/var/lib/ceph/bootstrap-rgw' do
@@ -88,7 +88,7 @@ if node['ceph']['version'] == 'hammer'
     mode node['ceph']['mode']
     recursive true
     action :create
-    not_if 'test -d /var/lib/ceph/bootstrap-rgw'
+    not_if { ::File.directory?("/var/lib/ceph/bootstrap-rgw") }
   end
 
   directory '/var/lib/ceph/bootstrap-mds' do
@@ -97,7 +97,7 @@ if node['ceph']['version'] == 'hammer'
     mode node['ceph']['mode']
     recursive true
     action :create
-    not_if 'test -d /var/lib/ceph/bootstrap-mds'
+    not_if { ::File.directory?("/var/lib/ceph/bootstrap-mds") }
   end
 end
 
@@ -111,7 +111,7 @@ execute 'format ceph-mon-secret as keyring' do
   user node['ceph']['owner']
   group node['ceph']['group']
   only_if { ceph_chef_mon_secret }
-  not_if "test -s #{keyring}"
+  not_if { ::File.size?("#{keyring}") }
   sensitive true if Chef::Resource::Execute.method_defined? :sensitive
 end
 
@@ -122,7 +122,7 @@ execute 'generate ceph-mon-secret as keyring' do
   user node['ceph']['owner']
   group node['ceph']['group']
   not_if { ceph_chef_mon_secret }
-  not_if "test -s #{keyring}"
+  not_if { ::File.size?("#{keyring}") }
   notifies :create, 'ruby_block[save ceph_chef_mon_secret]', :immediately
   sensitive true if Chef::Resource::Execute.method_defined? :sensitive
 end
@@ -161,7 +161,7 @@ execute 'ceph-mon mkfs' do
   creates "/var/lib/ceph/mon/#{node['ceph']['cluster']}-#{node['hostname']}/keyring"
   user node['ceph']['owner']
   group node['ceph']['group']
-  not_if "test -s /var/lib/ceph/mon/#{node['ceph']['cluster']}-#{node['hostname']}/keyring"
+  not_if { ::File.size?("/var/lib/ceph/mon/#{node['ceph']['cluster']}-#{node['hostname']}/keyring") }
 end
 
 ruby_block 'mon-finalize' do
@@ -170,7 +170,7 @@ ruby_block 'mon-finalize' do
       ::File.open("/var/lib/ceph/mon/#{node['ceph']['cluster']}-#{node['hostname']}/#{ack}", 'w').close
     end
   end
-  not_if "test -f /var/lib/ceph/mon/#{node['ceph']['cluster']}-#{node['hostname']}/done"
+  not_if { ::File.file?("/var/lib/ceph/mon/#{node['ceph']['cluster']}-#{node['hostname']}/done") }
 end
 
 if node['ceph']['version'] != 'hammer'

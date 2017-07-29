@@ -53,7 +53,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
       mode node['ceph']['mode']
       recursive true
       action :create
-      not_if "test -d /var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.#{inst['region']}-#{inst['name']}"
+      not_if { ::File.directory?("/var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.#{inst['region']}-#{inst['name']}") }
     end
 
     # Check for existing keys first!
@@ -78,14 +78,14 @@ if node['ceph']['pools']['radosgw']['federated_enable']
     execute 'update-ceph-radosgw-secret' do
       command lazy { "sudo ceph-authtool #{keyring} --name=client.radosgw.#{inst['region']}-#{inst['name']} --add-key=#{new_key} --cap osd 'allow rwx' --cap mon 'allow rwx'" }
       only_if { !new_key.to_s.strip.empty? }
-      only_if "test -s #{keyring}"
+      only_if { ::File.size?("#{keyring}") }
       sensitive true if Chef::Resource::Execute.method_defined? :sensitive
     end
 
     execute 'write-ceph-radosgw-secret' do
       command lazy { "sudo ceph-authtool #{keyring} --create-keyring --name=client.radosgw.#{inst['region']}-#{inst['name']} --add-key=#{new_key} --cap osd 'allow rwx' --cap mon 'allow rwx'" }
       only_if { !new_key.to_s.strip.empty? }
-      not_if "test -s #{keyring}"
+      not_if { ::File.size?("#{keyring}") }
       sensitive true if Chef::Resource::Execute.method_defined? :sensitive
     end
 
@@ -96,7 +96,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
       EOH
       creates keyring
       not_if { ceph_chef_radosgw_inst_secret("#{inst['region']}-#{inst['name']}") }
-      not_if "test -s #{keyring}"
+      not_if { ::File.size?("#{keyring}") }
       notifies :create, "ruby_block[save-radosgw-secret-#{inst['name']}]", :immediately
       sensitive true if Chef::Resource::Execute.method_defined? :sensitive
     end
@@ -142,12 +142,12 @@ if node['ceph']['pools']['radosgw']['federated_enable']
     if node['ceph']['pools']['radosgw']['federated_multisite_replication'] == true
       template "/etc/ceph/#{inst['region']}-region.json" do
         source 'radosgw-federated-region.json.erb'
-        not_if "test -s /etc/ceph/#{inst['region']}-region.json"
+        not_if { ::File.size?("/etc/ceph/#{inst['region']}-region.json") }
       end
 
       template "/etc/ceph/#{inst['region']}-region-map.json" do
         source 'radosgw-federated-region-map.json.erb'
-        not_if "test -s /etc/ceph/#{inst['region']}-region-map.json"
+        not_if { ::File.size?("/etc/ceph/#{inst['region']}-region-map.json") }
       end
 
       region_file = "/etc/ceph/#{inst['region']}-region.json"
@@ -165,7 +165,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
             :zone_port => (inst['port']).to_s
           }
         }
-        not_if "test -s /etc/ceph/#{inst['region']}-#{inst['name']}-region.json"
+        not_if { ::File.size?("/etc/ceph/#{inst['region']}-#{inst['name']}-region.json") }
       end
 
       template "/etc/ceph/#{inst['region']}-#{inst['name']}-region-map.json" do
@@ -178,7 +178,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
             :zone_port => (inst['port']).to_s
           }
         }
-        not_if "test -s /etc/ceph/#{inst['region']}-#{inst['name']}-region-map.json"
+        not_if { ::File.size?("/etc/ceph/#{inst['region']}-#{inst['name']}-region-map.json") }
       end
 
       region_file = "/etc/ceph/#{inst['region']}-#{inst['name']}-region.json"
@@ -198,7 +198,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
             :access_key => ''
           }
         }
-        not_if "test -s /etc/ceph/#{zone}-zone.json"
+        not_if { ::File.size?("/etc/ceph/#{zone}-zone.json") }
       end
 
       execute "region-set-#{inst['region']}" do
@@ -261,7 +261,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
           ::File.open("/var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.#{inst['region']}-#{inst['name']}/#{ack}", 'w').close
         end
       end
-      not_if "test -f /var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.#{inst['region']}-#{inst['name']}/done"
+      not_if { ::File.file?("/var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.#{inst['region']}-#{inst['name']}/done") }
     end
   end
 end

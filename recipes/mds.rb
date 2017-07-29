@@ -30,7 +30,7 @@ if node['ceph']['version'] == 'hammer'
     mode node['ceph']['mode']
     recursive true
     action :create
-    not_if "test -d /var/lib/ceph/mds/#{cluster}-#{node['hostname']}"
+    not_if { ::File.directory?("/var/lib/ceph/mds/#{cluster}-#{node['hostname']}") }
   end
 end
 

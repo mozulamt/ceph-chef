@@ -69,14 +69,14 @@ directory '/etc/ceph/scripts' do
   mode node['ceph']['mode']
   recursive true
   action :create
-  not_if 'test -d /etc/ceph/scripts'
+  not_if { ::File.directory?("/etc/ceph/scripts") }
 end
 
 # Add ceph_journal.sh helper script to all OSD nodes and place it in /etc/ceph
 cookbook_file '/etc/ceph/scripts/ceph_journal.sh' do
   source 'ceph_journal.sh'
   mode node['ceph']['mode']
-  not_if 'test -f /etc/ceph/scripts/ceph_journal.sh'
+  not_if { ::File.file?("/etc/ceph/scripts/ceph_journal.sh") }
 end
 
 if node['ceph']['version'] == 'hammer'
@@ -86,7 +86,7 @@ if node['ceph']['version'] == 'hammer'
     mode node['ceph']['mode']
     recursive true
     action :create
-    not_if 'test -d /var/lib/ceph/bootstrap-osd'
+    not_if { ::File.directory?("/var/lib/ceph/bootstrap-osd") }
   end
 
   # Default data location - do not modify
@@ -96,7 +96,7 @@ if node['ceph']['version'] == 'hammer'
     mode node['ceph']['mode']
     recursive true
     action :create
-    not_if 'test -d /var/lib/ceph/osd'
+    not_if { ::File.directory?("/var/lib/ceph/osd") }
   end
 end
 

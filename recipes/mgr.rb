@@ -30,7 +30,7 @@ if node['ceph']['version'] != 'hammer' && node['ceph']['mgr']['enable']
   #   mode node['ceph']['mode']
   #   recursive true
   #   action :create
-  #   not_if "test -d /var/lib/ceph/mgr/#{cluster}-#{node['hostname']}"
+  #   not_if { ::File.directory?("/var/lib/ceph/mgr/#{cluster}-#{node['hostname']}") }
   # end
   #
   # # Put a different ceph-mgr unit file since we don't want it to create keys for us
@@ -46,7 +46,7 @@ if node['ceph']['version'] != 'hammer' && node['ceph']['mgr']['enable']
   #   user node['ceph']['owner']
   #   group node['ceph']['group']
   #   # only_if { ceph_chef_mgr_secret }
-  #   not_if "test -s #{keyring}"
+  #   not_if { ::File.size?("#{keyring}") }
   #   sensitive true if Chef::Resource::Execute.method_defined? :sensitive
   # end
   #

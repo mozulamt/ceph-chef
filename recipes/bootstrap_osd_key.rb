@@ -24,9 +24,9 @@ bash 'create-bootstrap-osd-key' do
         --name=client.bootstrap-osd \
         --add-key="$BOOTSTRAP_KEY"
   EOH
-  only_if "test -s /etc/ceph/#{node['ceph']['cluster']}.mon.keyring"
-  not_if { ceph_chef_bootstrap_osd_secret }
-  not_if "test -s /var/lib/ceph/bootstrap-osd/#{node['ceph']['cluster']}.keyring"
+  only_if { ::File.size?("/etc/ceph/#{node['ceph']['cluster']}.mon.keyring") }
+  not_if { !ceph_chef_bootstrap_osd_secret.nil? }
+  not_if { ::File.size?("/var/lib/ceph/bootstrap-osd/#{node['ceph']['cluster']}.keyring") }
   notifies :create, 'ruby_block[save_bootstrap_osd]', :immediately
   sensitive true if Chef::Resource::Execute.method_defined? :sensitive
 end
@@ -34,8 +34,8 @@ end
 # If the bootstrap-osd secret key exists as a node attribute but not on disk, write it out
 execute 'format bootstrap-osd-secret as keyring' do
   command lazy { "ceph-authtool '/var/lib/ceph/bootstrap-osd/#{node['ceph']['cluster']}.keyring' --create-keyring --name=client.bootstrap-osd --add-key=#{ceph_chef_bootstrap_osd_secret}" }
-  only_if { ceph_chef_bootstrap_osd_secret }
-  not_if "test -s /var/lib/ceph/bootstrap-osd/#{node['ceph']['cluster']}.keyring"
+  only_if { !ceph_chef_bootstrap_osd_secret.nil? }
+  not_if { ::File.size?("/var/lib/ceph/bootstrap-osd/#{node['ceph']['cluster']}.keyring") }
   sensitive true if Chef::Resource::Execute.method_defined? :sensitive
 end
 
@@ -45,8 +45,8 @@ ruby_block 'check_bootstrap_osd' do
     true
   end
   notifies :create, 'ruby_block[save_bootstrap_osd]', :immediately
-  not_if { ceph_chef_bootstrap_osd_secret }
-  only_if "test -s /var/lib/ceph/bootstrap-osd/#{node['ceph']['cluster']}.keyring"
+  not_if { !ceph_chef_bootstrap_osd_secret.nil? }
+  only_if { ::File.size?("/var/lib/ceph/bootstrap-osd/#{node['ceph']['cluster']}.keyring") }
 end
 
 # Save the bootstrap-osd secret key to the node attributes. This is typically performed

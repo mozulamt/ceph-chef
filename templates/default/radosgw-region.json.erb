@@ -1,8 +1,12 @@
 {
-  "name": "<%= @region %>-<%= @zone %>",
-  "api_name": "<%= @region %>-<%= @zone %>",
+  "name": "<%= @name %>",
+  "api_name": "<%= @name %>",
   "is_master": "true",
-  "endpoints": ["http:\/\/<%= @zone_url %>:<%= @zone_port %>\/"],
+  "endpoints": [
+    <% @endpoints.each_with_index do |h, index| -%>
+      "<%= h %>"<%= ',' unless index == @endpoints.size - 1 %>
+    <% end -%>
+  ],
   "hostnames": [
       <% @s3hostnames.each_with_index do |h, index| -%>
           "<%= h %>"<%= ',' unless index == @s3hostnames.size - 1 %>
@@ -13,15 +17,17 @@
           "<%= h %>"<%= ',' unless index == @s3hostnames.size - 1 %>
       <% end -%>
   ],
-  "master_zone": "<%= @region %>-<%= @zone %>",
+  "master_zone": "<%= @master_zone %>",
   "zones": [
+  <% @zones.each_with_index do |zone, index| %>
         {
-          "name": "<%= @region %>-<%= @zone %>",
+          "name": "<%= zone['region'] %>-<%= zone['name'] %>",
           "endpoints": [
-                "http:\/\/<%= @zone_url %>:<%= @zone_port %>\/"],
+                "http:\/\/<%= zone['url'] %>:<%= zone['port'] %>\/"],
           "log_meta": "true",
           "log_data": "true"
-        }
+        }<% if index < @zones.size %>,<% end %>
+  <% end %>
   ],
   "placement_targets": [
    {

@@ -8,6 +8,18 @@
         "is_master": "true",
         "endpoints": ["http:\/\/<%= node['ceph']['pools']['radosgw']['federated_zone_instances'][0]['url'] %>:<%= node['ceph']['pools']['radosgw']['federated_zone_instances'][0]['port'] %>\/"],
         "master_zone": "<%= node['ceph']['pools']['radosgw']['federated_regions'][0] %>-<%= node['ceph']['pools']['radosgw']['federated_master_zone'] %>",
+        "hostnames": [
+            <% @s3hostnames = node['ceph']['pools']['radosgw']['s3hostnames'] -%>
+            <% @s3hostnames.each_with_index do |h, index| -%>
+                "<%= h %>"<%= ',' unless index == @s3hostnames.size - 1 %>
+            <% end -%>
+        ],
+        "hostnames_s3website": [
+            <% @s3hostnames_website = node['ceph']['pools']['radosgw']['s3hostnames_website'] -%>
+            <% @s3hostnames_website.each_with_index do |h, index| -%>
+                "<%= h %>"<%= ',' unless index == @s3hostnames.size - 1 %>
+            <% end -%>
+        ],
         "zones": [
         <% node['ceph']['pools']['radosgw']['federated_zone_instances'].each_with_index do |zone, index| %>
               {

@@ -162,7 +162,9 @@ if node['ceph']['pools']['radosgw']['federated_enable']
             :region => (inst['region']).to_s,
             :zone => (inst['name']).to_s,
             :zone_url => (inst['url']).to_s,
-            :zone_port => (inst['port']).to_s
+            :zone_port => (inst['port']).to_s,
+            :s3hostnames => Array(inst['s3hostnames']),
+            :s3hostnames_website => Array(inst['s3hostnames_website']),
           }
         }
         not_if { ::File.size?("/etc/ceph/#{inst['region']}-#{inst['name']}-region.json") }
@@ -176,6 +178,8 @@ if node['ceph']['pools']['radosgw']['federated_enable']
             :zone => (inst['name']).to_s,
             :zone_url => (inst['url']).to_s,
             :zone_port => (inst['port']).to_s
+            :s3hostnames => Array(inst['s3hostnames']),
+            :s3hostnames_website => Array(inst['s3hostnames_website']),
           }
         }
         not_if { ::File.size?("/etc/ceph/#{inst['region']}-#{inst['name']}-region-map.json") }

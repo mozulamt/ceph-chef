@@ -158,8 +158,20 @@ if node['ceph']['pools']['radosgw']['federated_enable']
       end
 
       template "/etc/ceph/#{inst['region']}-region-map.json" do
-        source 'radosgw-federated-region-map.json.erb'
+        source 'radosgw-region-map.json.erb'
         not_if { ::File.size?("/etc/ceph/#{inst['region']}-region-map.json") }
+        variables lazy {
+          {
+            :name => node['ceph']['pools']['radosgw']['federated_regions'][0],
+            :master_zone => node['ceph']['pools']['radosgw']['federated_regions'][0] + "-" + node['ceph']['pools']['radosgw']['federated_master_zone'],
+            :zones => node['ceph']['pools']['radosgw']['federated_zone_instances'],
+            :endpoints => [
+              printf("http://%s:%d/", node['ceph']['pools']['radosgw']['federated_zone_instances'][0]['url'], node['ceph']['pools']['radosgw']['federated_zone_instances'][0]['port']),
+            ],
+            :s3hostnames => node['ceph']['pools']['radosgw']['s3hostnames'],
+            :s3hostnames_website => node['ceph']['pools']['radosgw']['s3hostnames_website'],
+          }
+        }
       end
 
       region_file = "/etc/ceph/#{inst['region']}-region.json"
@@ -191,13 +203,21 @@ if node['ceph']['pools']['radosgw']['federated_enable']
       end
 
       template "/etc/ceph/#{inst['region']}-#{inst['name']}-region-map.json" do
-        source 'radosgw-federated-no-replication-region-map.json.erb'
+        source 'radosgw-region-map.json.erb'
         variables lazy {
           {
-            :region => (inst['region']).to_s,
-            :zone => (inst['name']).to_s,
-            :zone_url => (inst['url']).to_s,
-            :zone_port => (inst['port']).to_s
+            :name => "#{inst['region']}-#{inst['zone'}",
+            :master_zone => "#{inst['region']}-#{inst['zone'}",
+            :zones => [
+              { :region => inst['region'].to_s,
+                :name => inst['zone'].to_s,
+                :zone_url => inst['url'].to_s,
+                :zone_port => inst['port'].to_s,
+              },
+            ]
+            :endpoints => [
+              printf("http://%s:%d/", inst['url'], inst['port']),
+            ],
             :s3hostnames => Array(inst['s3hostnames']),
             :s3hostnames_website => Array(inst['s3hostnames_website']),
           }

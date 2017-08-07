@@ -4,6 +4,7 @@
   "is_master": "true",
   "endpoints": [
     <% @endpoints.each_with_index do |h, index| -%>
+    <% next if h.nil? or h.empty? -%>
       "<%= h %>"<%= ',' unless index == @endpoints.size - 1 %>
     <% end -%>
   ],
@@ -23,7 +24,8 @@
         {
           "name": "<%= zone['zonegroup'] %>-<%= zone['name'] %>",
           "endpoints": [
-                "http:\/\/<%= zone['url'] %>:<%= zone['port'] %>\/"],
+            "http:\/\/<%= zone['url'] %>:<%= zone['port'] %>\/"
+          ],
           "log_meta": "true",
           "log_data": "true"
         }<% if index < @zones.size %>,<% end %>

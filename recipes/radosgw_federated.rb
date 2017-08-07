@@ -155,7 +155,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
             :master_zone => node['ceph']['pools']['radosgw']['federated_zonegroups'][0] + "-" + node['ceph']['pools']['radosgw']['federated_master_zone'],
             :zones => node['ceph']['pools']['radosgw']['federated_zone_instances'],
             :endpoints => [
-              printf("http://%s:%d/", node['ceph']['pools']['radosgw']['federated_zone_instances'][0]['url'], node['ceph']['pools']['radosgw']['federated_zone_instances'][0]['port']),
+              "http://#{node['ceph']['pools']['radosgw']['federated_zone_instances'][0]['url']}:#{node['ceph']['pools']['radosgw']['federated_zone_instances'][0]['port'])}/",
             ],
             :s3hostnames => node['ceph']['pools']['radosgw']['s3hostnames'],
             :s3hostnames_website => node['ceph']['pools']['radosgw']['s3hostnames_website'],
@@ -172,7 +172,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
             :master_zone => node['ceph']['pools']['radosgw']['federated_zonegroups'][0] + "-" + node['ceph']['pools']['radosgw']['federated_master_zone'],
             :zones => node['ceph']['pools']['radosgw']['federated_zone_instances'],
             :endpoints => [
-              printf("http://%s:%d/", node['ceph']['pools']['radosgw']['federated_zone_instances'][0]['url'], node['ceph']['pools']['radosgw']['federated_zone_instances'][0]['port']),
+              "http://#{node['ceph']['pools']['radosgw']['federated_zone_instances'][0]['url']}:#{node['ceph']['pools']['radosgw']['federated_zone_instances'][0]['port'])}/",
             ],
             :s3hostnames => node['ceph']['pools']['radosgw']['s3hostnames'],
             :s3hostnames_website => node['ceph']['pools']['radosgw']['s3hostnames_website'],
@@ -194,7 +194,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
             :master_zone => "#{inst['zonegroup']}-#{inst['name']}",
             :zones => node['ceph']['pools']['radosgw']['federated_zone_instances'],
             :endpoints => [
-              printf("http://%s:%d/", (inst['url']).to_s, (inst['port']).to_s),
+              "http://#{inst['url']}:#{inst['port']}/",
             ],
             :s3hostnames => Array(inst['s3hostnames']),
             :s3hostnames_website => Array(inst['s3hostnames_website']),
@@ -210,7 +210,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
             :master_zone => "#{inst['zonegroup']}-#{inst['name']}",
             :zones => node['ceph']['pools']['radosgw']['federated_zone_instances'],
             :endpoints => [
-              printf("http://%s:%d/", (inst['url']).to_s, (inst['port']).to_s),
+              "http://#{inst['url']}:#{inst['port']}/",
             ],
             :s3hostnames => Array(inst['s3hostnames']),
             :s3hostnames_website => Array(inst['s3hostnames_website']),

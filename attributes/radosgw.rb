@@ -55,6 +55,12 @@ default['ceph']['radosgw']['rgw_thread_pool'] = 100
 default['ceph']['radosgw']['civetweb_access_log_file'] = '/var/log/radosgw/civetweb.access'
 default['ceph']['radosgw']['civetweb_error_log_file'] = '/var/log/radosgw/civetweb.error'
 
+# What IP should civetweb bind to?
+# It treats empty string as '0.0.0.0', and binds IPv4-only.
+#default['ceph']['radosgw']['civetweb_bindip'] = ''
+# Bind to any address on IPv6 AND IPv4.
+default['ceph']['radosgw']['civetweb_bindip'] = '[::]'
+
 # OpenStack Keystone specific
 # Will radosgw integrate with OpenStack Keystone - true/false
 default['ceph']['radosgw']['keystone']['auth'] = false

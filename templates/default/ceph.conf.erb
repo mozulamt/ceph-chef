@@ -237,19 +237,16 @@
   rgw gc processor period = <%= node['ceph']['radosgw']['gc']['processor_period'] %>
   pid file = /var/run/ceph/$name.<%= inst['zonegroup'] %>-<%= inst['name'] %>.pid
   # Increased to 1 to log HTTP return codes - http://tracker.ceph.com/issues/12432
+  <% threads = inst['threads'] || node['ceph']['radosgw']['civetweb_num_threads'] -%>
+  <% civetweb_accesslog = 'access_log='+ node['ceph']['radosgw']['civetweb_access_log_file'] + '.' + inst['name'] + '.log' if node['ceph']['radosgw']['debug']['logs']['enable'] -%>
+  <% civetweb_errorlog = 'access_log='+ node['ceph']['radosgw']['civetweb_error_log_file'] + '.' + inst['name'] + '.log' -%>
+  <% civetweb_bind = inst['bindip'] || node['ceph']['radosgw']['civetweb_bindip'] || '' -%>
+  <% civetweb_bind += ':' unless civetweb_bind.empty? -%>
+  <% civetweb_bind += inst['port'].to_s -%>
+  rgw frontends = civetweb port=<%= civetweb_bind %> num_threads=<%= threads %> error_log_file=<%= civetweb_errorlog %> <%= civetweb_accesslog %>
   <% if node['ceph']['radosgw']['debug']['logs']['enable'] %>
-  <% if inst['threads'] %>
-  rgw frontends = civetweb port=<%= inst['port'] %> num_threads=<%= inst['threads'] %> error_log_file=<%= node['ceph']['radosgw']['civetweb_error_log_file'] %>.<%= inst['name'] %>.log access_log_file=<%= node['ceph']['radosgw']['civetweb_access_log_file'] %>.<%= inst['name'] %>.log
-  <% else %>
-  rgw frontends = civetweb port=<%= inst['port'] %> num_threads=<%= node['ceph']['radosgw']['civetweb_num_threads'] %> error_log_file=<%= node['ceph']['radosgw']['civetweb_error_log_file'] %>.<%= inst['name'] %>.log access_log_file=<%= node['ceph']['radosgw']['civetweb_access_log_file'] %>.<%= inst['name'] %>.log
-  <% end %>
   log file = /var/log/radosgw/$cluster.client.radosgw.<%= inst['zonegroup'] %>-<%= inst['name'] %>.log
   debug rgw = 1/5
-  <% else %>
-  <% if inst['threads'] %>
-  rgw frontends = civetweb port=<%= inst['port'] %> num_threads=<%= inst['threads'] %> error_log_file=<%= node['ceph']['radosgw']['civetweb_error_log_file'] %>.<%= inst['name'] %>.log
-  <% else %>
-  rgw frontends = civetweb port=<%= inst['port'] %> num_threads=<%= node['ceph']['radosgw']['civetweb_num_threads'] %> error_log_file=<%= node['ceph']['radosgw']['civetweb_error_log_file'] %>.<%= inst['name'] %>.log
   <% end %>
   debug default=0/0
   debug lockdep=0/0

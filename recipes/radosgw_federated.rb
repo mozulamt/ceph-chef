@@ -25,10 +25,6 @@ service_type = node['ceph']['mon']['init_style']
 
 # NOTE: This base_key can also be the bootstrap-rgw key (ceph.keyring) if desired but the default is the admin key. Just change it here.
 base_key = "/etc/ceph/#{node['ceph']['cluster']}.client.admin.keyring"
-	
-# Client name for RGW ops
-rgwclient="client.radosgw.#{inst['zonegroup']}-#{inst['name']}"
-rgwclient_opt="--name=#{rgwclient}"
 
 # NOTE: If multisite-replication == true then one zonegroup and more than one zone will need to exist. Can support
 # additional zonegroups if some base logic is changed below but for now just one zone.
@@ -40,6 +36,11 @@ rgwclient_opt="--name=#{rgwclient}"
 
 if node['ceph']['pools']['radosgw']['federated_enable']
   node['ceph']['pools']['radosgw']['federated_zone_instances'].each do |inst|
+    # Client name for RGW ops
+    rgwclient="client.radosgw.#{inst['zonegroup']}-#{inst['name']}"
+    rgwclient_opt="--name=#{rgwclient}"
+
+    # Keyring
     keyring = if node['ceph']['pools']['radosgw']['federated_multisite_replication']
                 "/etc/ceph/#{node['ceph']['cluster']}.client.radosgw.keyring"
               else
@@ -135,7 +136,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
 
     # Create a realm if needed
     realm = inst['realm'] || 'gold'
-	radosgw_admin_cmd="sudo radosgw-admin #{rgwclient_opt}"
+    radosgw_admin_cmd="sudo radosgw-admin #{rgwclient_opt}"
     execute "realm-create-#{inst['zonegroup']}" do
       command <<-EOH
         #{radosgw_admin_cmd} realm create --rgw-realm=#{realm} --default
@@ -189,11 +190,11 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         not_if { ::File.size?("/etc/ceph/#{inst['zonegroup']}-#{inst['name']}-zonegroup.json") }
         variables lazy {
           {
-            :name => "#{inst['zonegroup']}-#{inst['zone']}",
-            :master_zone => "#{inst['zonegroup']}-#{inst['zone']}",
+            :name => "#{inst['zonegroup']}-#{inst['name']}",
+            :master_zone => "#{inst['zonegroup']}-#{inst['name']}",
             :zones => [
               { :zonegroup => inst['zonegroup'].to_s,
-                :name => inst['zone'].to_s,
+                :name => inst['name'].to_s,
                 :zone_url => inst['url'].to_s,
                 :zone_port => inst['port'].to_s,
               },
@@ -211,11 +212,11 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         source 'radosgw-zonegroup-map.json.erb'
         variables lazy {
           {
-            :name => "#{inst['zonegroup']}-#{inst['zone']}",
-            :master_zone => "#{inst['zonegroup']}-#{inst['zone']}",
+            :name => "#{inst['zonegroup']}-#{inst['name']}",
+            :master_zone => "#{inst['zonegroup']}-#{inst['name']}",
             :zones => [
               { :zonegroup => inst['zonegroup'].to_s,
-                :name => inst['zone'].to_s,
+                :name => inst['name'].to_s,
                 :zone_url => inst['url'].to_s,
                 :zone_port => inst['port'].to_s,
               },

@@ -189,15 +189,15 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         not_if { ::File.size?("/etc/ceph/#{inst['zonegroup']}-#{inst['name']}-zonegroup.json") }
         variables lazy {
           {
-            :name => "#{inst['zonegroup']}-#{inst['zone'}",
-            :master_zone => "#{inst['zonegroup']}-#{inst['zone'}",
+            :name => "#{inst['zonegroup']}-#{inst['zone']}",
+            :master_zone => "#{inst['zonegroup']}-#{inst['zone']}",
             :zones => [
               { :zonegroup => inst['zonegroup'].to_s,
                 :name => inst['zone'].to_s,
                 :zone_url => inst['url'].to_s,
                 :zone_port => inst['port'].to_s,
               },
-            ]
+            ],
             :endpoints => [
               printf("http://%s:%d/", inst['url'], inst['port']),
             ],
@@ -211,15 +211,15 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         source 'radosgw-zonegroup-map.json.erb'
         variables lazy {
           {
-            :name => "#{inst['zonegroup']}-#{inst['zone'}",
-            :master_zone => "#{inst['zonegroup']}-#{inst['zone'}",
+            :name => "#{inst['zonegroup']}-#{inst['zone']}",
+            :master_zone => "#{inst['zonegroup']}-#{inst['zone']}",
             :zones => [
               { :zonegroup => inst['zonegroup'].to_s,
                 :name => inst['zone'].to_s,
                 :zone_url => inst['url'].to_s,
                 :zone_port => inst['port'].to_s,
               },
-            ]
+            ],
             :endpoints => [
               printf("http://%s:%d/", inst['url'], inst['port']),
             ],
@@ -280,13 +280,13 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         command <<-EOH
           #{radosgw_admin_cmd} zone set --rgw-zone=#{inst['zonegroup']}-#{inst['name']} --infile /etc/ceph/#{zone}-zone.json
         EOH
-        not_if "#{radosgw_admin_cmd} zone get --rgw-zone=#{inst['zonegroup']}-#{inst['name']}
+        not_if "#{radosgw_admin_cmd} zone get --rgw-zone=#{inst['zonegroup']}-#{inst['name']}"
       end
 
       execute "create-zonegroup-defaults-#{inst['zonegroup']}" do
         command <<-EOH
           #{radosgw_admin_cmd} zonegroup default --rgw-zonegroup=#{zonegroup}
-          #{radosgw_admin_cmd} zonegroup-map update --rgw-zonegroup #{zonegroup}
+          #{radosgw_admin_cmd} zonegroup-map update --rgw-zonegroup=#{zonegroup}
         EOH
       end
     end

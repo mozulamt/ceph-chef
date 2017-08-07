@@ -80,24 +80,24 @@ node['ceph']['radosgw']['users'].each do |user|
                          "#{user['secret_key']}"
                        end
 
-          rgw_admin = JSON.parse(`sudo radosgw-admin user create --name client.radosgw.#{inst['region']}-#{inst['name']} --display-name="#{user['name']}" --uid="#{user['uid']}" "#{max_buckets}" --access-key="#{access_key}" --secret="#{secret_key}"`)
+          rgw_admin = JSON.parse(`sudo radosgw-admin user create --name client.radosgw.#{inst['zonegroup']}-#{inst['name']} --display-name="#{user['name']}" --uid="#{user['uid']}" "#{max_buckets}" --access-key="#{access_key}" --secret="#{secret_key}"`)
           if user.attribute?('admin_caps') && !user['admin_caps'].empty?
-            rgw_admin_cap = JSON.parse(`sudo radosgw-admin caps add --name client.radosgw.#{inst['region']}-#{inst['name']} --uid="#{user['uid']}" --caps="#{user['admin_caps']}"`)
+            rgw_admin_cap = JSON.parse(`sudo radosgw-admin caps add --name client.radosgw.#{inst['zonegroup']}-#{inst['name']} --uid="#{user['uid']}" --caps="#{user['admin_caps']}"`)
           end
         end
-        not_if "sudo radosgw-admin user info --name client.radosgw.#{inst['region']}-#{inst['name']} --uid='#{user['uid']}'"
+        not_if "sudo radosgw-admin user info --name client.radosgw.#{inst['zonegroup']}-#{inst['name']} --uid='#{user['uid']}'"
         ignore_failure true
       end
 
       if user.attribute?('buckets')
         user['buckets'].each do |bucket|
           execute "create-bucket-#{bucket['name']}" do
-            command "radosgw-admin2 --user #{user['uid']} --endpoint #{node['ceph']['radosgw']['default_url']} --port #{node['ceph']['radosgw']['port']} --bucket #{bucket['name']} -r #{inst['region']} -z #{inst['name']} --action create"
+            command "radosgw-admin2 --user #{user['uid']} --endpoint #{node['ceph']['radosgw']['default_url']} --port #{node['ceph']['radosgw']['port']} --bucket #{bucket['name']} -r #{inst['zonegroup']} -z #{inst['name']} --action create"
             ignore_failure true
           end
           if bucket['acl'] == 'public'
               execute "change-bucket-acl-#{bucket['name']}" do
-                command "radosgw-admin2 --user #{user['uid']} --endpoint #{node['ceph']['radosgw']['default_url']} --port #{node['ceph']['radosgw']['port']} --bucket #{bucket['name']} -r #{inst['region']} -z #{inst['name']} --action public"
+                command "radosgw-admin2 --user #{user['uid']} --endpoint #{node['ceph']['radosgw']['default_url']} --port #{node['ceph']['radosgw']['port']} --bucket #{bucket['name']} -r #{inst['zonegroup']} -z #{inst['name']} --action public"
                 ignore_failure true
               end
           end

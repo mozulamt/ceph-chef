@@ -24,10 +24,10 @@ require 'securerandom'
 # by rebuilding the structure dynamically based on the federated options.
 # name should already have '.' as first character so don't add it to formating here
 def ceph_chef_build_federated_pool(pool)
-  node['ceph']['pools'][pool]['federated_regions'].each do |region|
+  node['ceph']['pools'][pool]['federated_zonegroups'].each do |zonegroup|
     node['ceph']['pools'][pool]['federated_zone_instances'].each do |zone_instance|
       node['ceph']['pools'][pool]['pools'].each do |pool_val|
-        federated_name = ".#{region}-#{zone_instance['name']}#{pool_val['name']}"
+        federated_name = ".#{zonegroup}-#{zone_instance['name']}#{pool_val['name']}"
         unless node['ceph']['pools'][pool]['federated_names'].include? federated_name
           node.default['ceph']['pools'][pool]['federated_names'] << federated_name
           node.default['ceph']['pools'][pool]['federated']['pools'] << pool_val
@@ -38,11 +38,11 @@ def ceph_chef_build_federated_pool(pool)
 end
 
 # def ceph_chef_build_federated_pool(pool)
-#   node['ceph']['pools'][pool]['federated_regions'].each do |region|
+#   node['ceph']['pools'][pool]['federated_zonegroups'].each do |zonegroup|
 #     node['ceph']['pools'][pool]['federated_zones'].each do |zone|
 #       node['ceph']['pools'][pool]['federated_instances'].each do |instance|
 #         node['ceph']['pools'][pool]['pools'].each do |pool_val|
-#           federated_name = ".#{region}-#{zone}-#{instance['name']}#{pool_val['name']}"
+#           federated_name = ".#{zonegroup}-#{zone}-#{instance['name']}#{pool_val['name']}"
 #           if !node['ceph']['pools'][pool]['federated_names'].include? federated_name
 #             node.default['ceph']['pools'][pool]['federated_names'] << federated_name
 #             node.default['ceph']['pools'][pool]['federated']['pools'] << pool_val

@@ -1,5 +1,5 @@
 {
-  "regions": [
+  "zonegroups": [
     {
       "key": "<%= @name %>",
       "val": {
@@ -25,7 +25,7 @@
         "zones": [
           <% @zones.each_with_index do |zone, index| %>
           {
-            "name": "<%= zone['region'] %>-<%= zone['name'] %>",
+            "name": "<%= zone['zonegroup'] %>-<%= zone['name'] %>",
             "endpoints": [
                   "http:\/\/<%= zone['url'] %>:<%= zone['port'] %>\/"],
             "log_meta": "true",
@@ -43,7 +43,7 @@
       }
     }
   ],
-  "master_region": "<%= @name %>",
+  "master_zonegroup": "<%= @name %>",
   "bucket_quota": {
     "enabled": false,
     "max_size_kb": -1,

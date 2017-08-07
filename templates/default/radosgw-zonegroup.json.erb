@@ -21,7 +21,7 @@
   "zones": [
   <% @zones.each_with_index do |zone, index| %>
         {
-          "name": "<%= zone['region'] %>-<%= zone['name'] %>",
+          "name": "<%= zone['zonegroup'] %>-<%= zone['name'] %>",
           "endpoints": [
                 "http:\/\/<%= zone['url'] %>:<%= zone['port'] %>\/"],
           "log_meta": "true",

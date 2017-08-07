@@ -44,7 +44,7 @@ secret = ''
 bucket = ''
 endpoint = ''
 port = 80
-region = None
+zonegroup = None
 zone = None
 
 # NB: Outputs both JSON and CSV for pulling into Excel and graphing etc.
@@ -84,10 +84,10 @@ def get_usage(start_date=None, end_date=None, show_log_entries=False):
         if end_date is not None:
             end_date_str = "--end-date=%s" % end_date
 
-        if region is None and zone is None:
+        if zonegroup is None and zone is None:
             cmd = ["/usr/bin/radosgw-admin", "usage", "show", start_date_str, end_date_str, "--show-log-entries=%s" % show_log_entries]
         else:
-            cmd = ["sudo", "/bin/radosgw-admin", "usage", "show", "-n", "client.radosgw.%s-%s" % (region, zone), start_date_str, end_date_str, "--show-log-entries=%s" % show_log_entries]
+            cmd = ["sudo", "/bin/radosgw-admin", "usage", "show", "-n", "client.radosgw.%s-%s" % (zonegroup, zone), start_date_str, end_date_str, "--show-log-entries=%s" % show_log_entries]
 
         json_data = radosgw_admin(cmd)
         if json_data:
@@ -122,10 +122,10 @@ def get_users(output=None):
     users = None
 
     try:
-        if region is None and zone is None:
+        if zonegroup is None and zone is None:
             cmd = ["/usr/bin/radosgw-admin", "metadata", "list", "user"]
         else:
-            cmd = ["sudo", "/bin/radosgw-admin", "metadata", "list", "user", "-n", "client.radosgw.%s-%s" % (region, zone)]
+            cmd = ["sudo", "/bin/radosgw-admin", "metadata", "list", "user", "-n", "client.radosgw.%s-%s" % (zonegroup, zone)]
 
         json_data = radosgw_admin(cmd)
         if json_data:
@@ -151,10 +151,10 @@ def get_user(uid):
     data = None
 
     try:
-        if region is None and zone is None:
+        if zonegroup is None and zone is None:
             cmd = ["/usr/bin/radosgw-admin", "user", "info", "--uid", "%s" % uid]
         else:
-            cmd = ["sudo", "/bin/radosgw-admin", "user", "info", "-n", "client.radosgw.%s-%s" % (region, zone), "--uid", "%s" % uid]
+            cmd = ["sudo", "/bin/radosgw-admin", "user", "info", "-n", "client.radosgw.%s-%s" % (zonegroup, zone), "--uid", "%s" % uid]
 
         json_data = radosgw_admin(cmd)
         if json_data:
@@ -176,10 +176,10 @@ def get_user_bucket_stats(uid, bucket=None, output=None):
         if bucket is not None:
             bucket_str = "--bucket=%s" % bucket
 
-        if region is None and zone is None:
+        if zonegroup is None and zone is None:
             cmd = ["/usr/bin/radosgw-admin", "bucket", "stats", "--uid", "%s" % uid if bucket is None else "", "%s" % bucket_str]
         else:
-            cmd = ["sudo", "/bin/radosgw-admin", "bucket", "stats", "--uid", "%s" % uid if bucket is None else "", "%s" % bucket_str, "-n", "client.radosgw.%s-%s" % (region, zone)]
+            cmd = ["sudo", "/bin/radosgw-admin", "bucket", "stats", "--uid", "%s" % uid if bucket is None else "", "%s" % bucket_str, "-n", "client.radosgw.%s-%s" % (zonegroup, zone)]
 
         json_data = radosgw_admin(cmd)
         if json_data:
@@ -253,10 +253,10 @@ def user_stats_sync(uid, output=None):
     user_stats = None
 
     try:
-        if region is None and zone is None:
+        if zonegroup is None and zone is None:
             cmd = ["/usr/bin/radosgw-admin", "user", "stats", "--uid", "%s" % uid, "--sync-stats"]
         else:
-            cmd = ["sudo", "/bin/radosgw-admin", "user", "stats", "--uid", "%s" % uid, "--sync-stats", "-n", "client.radosgw.%s-%s" % (region, zone)]
+            cmd = ["sudo", "/bin/radosgw-admin", "user", "stats", "--uid", "%s" % uid, "--sync-stats", "-n", "client.radosgw.%s-%s" % (zonegroup, zone)]
 
         json_data = radosgw_admin(cmd)
         if json_data:
@@ -527,10 +527,10 @@ def get_user_secrets():
 
     retcode = False
     try:
-        if region is None and zone is None:
+        if zonegroup is None and zone is None:
             cmd = ["/usr/bin/radosgw-admin", "user", "info", "--uid", "%s" % user]
         else:
-            cmd = ["sudo", "/bin/radosgw-admin", "user", "info", "--uid", "%s" % user, "-n", "client.radosgw.%s-%s" % (region, zone)]
+            cmd = ["sudo", "/bin/radosgw-admin", "user", "info", "--uid", "%s" % user, "-n", "client.radosgw.%s-%s" % (zonegroup, zone)]
 
         user_dict = radosgw_admin(cmd)
         if user_dict:
@@ -573,10 +573,10 @@ def create_user(uid, display_name, access_key=None, secret_key=None):
     data = None
 
     try:
-        if region is None and zone is None:
+        if zonegroup is None and zone is None:
             cmd = ["/usr/bin/radosgw-admin", "user", "create", "--uid", "%s" % uid, "--display-name", "%s" % display_name]
         else:
-            cmd = ["sudo", "/bin/radosgw-admin", "user", "create", "-n", "client.radosgw.%s-%s" % (region, zone), "--uid", "%s" % uid, "--display-name", "%s" % display_name]
+            cmd = ["sudo", "/bin/radosgw-admin", "user", "create", "-n", "client.radosgw.%s-%s" % (zonegroup, zone), "--uid", "%s" % uid, "--display-name", "%s" % display_name]
 
         if access_key is not None and secret_key is not None:
             cmd.append("--access-key=%s" % access_key)
@@ -652,7 +652,7 @@ def main():
     p.add_argument('--version-id', action='store', default=None, help='Version ID of object.')
     p.add_argument('--duration', '-d', action='store', default=0, type=int, help='Object URL duration in seconds.')
     p.add_argument('--actions', '-a', nargs='+', help='Action(s) to take - N arguments.')
-    p.add_argument('--region', '-r', action='store', help='RGW Region (datacenter).')
+    p.add_argument('--zonegroup', '-r', action='store', help='RGW zonegroup (datacenter).')
     p.add_argument('--zone', '-z', action='store', help='RGW Zone (tier).')
     p.add_argument('--start-date', action='store', help='Usage Start Date - yyyy-mm-dd (radosgw-admin restriction of format) - Used only with usage task.')
     p.add_argument('--end-date', action='store', help='Usage End Date - yyyy-mm-dd (radosgw-admin restriction of format) - Used only with usage task.')
@@ -670,7 +670,7 @@ def main():
     global secret
     global endpoint
     global port
-    global region
+    global zonegroup
     global zone
 
     options = p.parse_args()
@@ -689,8 +689,8 @@ def main():
         endpoint = options.endpoint
     if options.port:
         port = options.port
-    if options.region:
-        region = options.region
+    if options.zonegroup:
+        zonegroup = options.zonegroup
     if options.zone:
         zone = options.zone
 

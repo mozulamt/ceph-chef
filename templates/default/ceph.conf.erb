@@ -200,24 +200,24 @@
 <% if @is_rgw -%>
 <% if @is_federated -%>
 <% node['ceph']['pools']['radosgw']['federated_zone_instances'].each do |inst| %>
-[client.radosgw.<%= inst['region'] %>-<%= inst['name'] %>]
+[client.radosgw.<%= inst['zonegroup'] %>-<%= inst['name'] %>]
   host = <%= node['hostname'] %>
   rgw opstate ratelimit = 0
-  <% if node['ceph']['pools']['radosgw']['federated_enable_regions_zones'] %>
-    <% fullregion = node['ceph']['pools']['radosgw']['federated_multisite_replication'] ? inst['region'] : "#{inst['region']}-#{inst['name']}" %>
-  rgw region = <%= fullregion %>
-  rgw zonegroup root pool = .<%= fullregion %>.rgw.root
-  rgw zone = <%= inst['region'] %>-<%= inst['name'] %>
-  rgw zone root pool = .<%= inst['region'] %>-<%= inst['name'] %>.rgw.root
-  <% end # federated_enable_regions_zones %>
+  <% if node['ceph']['pools']['radosgw']['federated_enable_zonegroups_zones'] %>
+    <% fullzonegroup = node['ceph']['pools']['radosgw']['federated_multisite_replication'] ? inst['zonegroup'] : "#{inst['zonegroup']}-#{inst['name']}" %>
+  rgw zonegroup = <%= fullzonegroup %>
+  rgw zonegroup root pool = .<%= fullzonegroup %>.rgw.root
+  rgw zone = <%= inst['zonegroup'] %>-<%= inst['name'] %>
+  rgw zone root pool = .<%= inst['zonegroup'] %>-<%= inst['name'] %>.rgw.root
+  <% end # federated_enable_zonegroups_zones %>
   <% if !node['ceph']['keyring']['rgw'].empty? %>
   <% if node['ceph']['pools']['radosgw']['federated_multisite_replication'] %>
   keyring = <%= node['ceph']['keyring']['rgw'] %>.keyring
   <% else %>
-  keyring = <%= node['ceph']['keyring']['rgw'] %>.<%= inst['region'] %>-<%= inst['name'] %>.keyring
+  keyring = <%= node['ceph']['keyring']['rgw'] %>.<%= inst['zonegroup'] %>-<%= inst['name'] %>.keyring
   <% end %>
   <% end -%>
-  admin socket = /var/run/ceph/$cluster-$type.radosgw.<%= inst['region'] %>-<%= inst['name'] %>.asok
+  admin socket = /var/run/ceph/$cluster-$type.radosgw.<%= inst['zonegroup'] %>-<%= inst['name'] %>.asok
   <% if inst['rgw_thread_pool'] %>
   rgw thread pool size = <%= inst['rgw_thread_pool'] %>
   <% else %>
@@ -235,7 +235,7 @@
   rgw gc obj min wait = <%= node['ceph']['radosgw']['gc']['obj_min_wait'] %>
   rgw gc processor max time = <%= node['ceph']['radosgw']['gc']['processor_max_time'] %>
   rgw gc processor period = <%= node['ceph']['radosgw']['gc']['processor_period'] %>
-  pid file = /var/run/ceph/$name.<%= inst['region'] %>-<%= inst['name'] %>.pid
+  pid file = /var/run/ceph/$name.<%= inst['zonegroup'] %>-<%= inst['name'] %>.pid
   # Increased to 1 to log HTTP return codes - http://tracker.ceph.com/issues/12432
   <% if node['ceph']['radosgw']['debug']['logs']['enable'] %>
   <% if inst['threads'] %>
@@ -243,7 +243,7 @@
   <% else %>
   rgw frontends = civetweb port=<%= inst['port'] %> num_threads=<%= node['ceph']['radosgw']['civetweb_num_threads'] %> error_log_file=<%= node['ceph']['radosgw']['civetweb_error_log_file'] %>.<%= inst['name'] %>.log access_log_file=<%= node['ceph']['radosgw']['civetweb_access_log_file'] %>.<%= inst['name'] %>.log
   <% end %>
-  log file = /var/log/radosgw/$cluster.client.radosgw.<%= inst['region'] %>-<%= inst['name'] %>.log
+  log file = /var/log/radosgw/$cluster.client.radosgw.<%= inst['zonegroup'] %>-<%= inst['name'] %>.log
   debug rgw = 1/5
   <% else %>
   <% if inst['threads'] %>

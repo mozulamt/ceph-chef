@@ -48,20 +48,20 @@ class RGWWebServiceAPI(object):
         # Setup admin user info here
         pass
 
-    def user_create(self, user, display_name=None, remote_addr=None, region=None, zone=None, access_key=None, secret_key=None, email=None, zone_region_prefix="client.radosgw"):
+    def user_create(self, user, display_name=None, remote_addr=None, zonegroup=None, zone=None, access_key=None, secret_key=None, email=None, zone_zonegroup_prefix="client.radosgw"):
         # Set the display_name equal to the user id if display_name not passed in!
         if display_name is None:
             display_name = user
 
-        if region is not None and zone is not None:
+        if zonegroup is not None and zone is not None:
             cmd = ["sudo", "/bin/radosgw-admin", "user", "create", "--conf", "/etc/ceph/ceph.conf", "--uid", "%s" % user, "--display-name", "%s" % display_name]
         else:
             cmd = ["/usr/bin/radosgw-admin", "user", "create", "--conf", "/etc/ceph/ceph.conf", "--uid", "%s" % user, "--display-name", "%s" % display_name]
 
-        if region is not None and zone is not None:
+        if zonegroup is not None and zone is not None:
             cmd.append("-n")
             # NB: This should match '[client.radosgw...]' or something similar found in ceph.conf for the RGW section
-            cmd.append("%s.%s-%s" % (zone_region_prefix, region, zone))
+            cmd.append("%s.%s-%s" % (zone_zonegroup_prefix, zonegroup, zone))
 
         if email is not None:
             cmd.append("--email")
@@ -78,21 +78,21 @@ class RGWWebServiceAPI(object):
 
         return call(cmd, remote_addr)
 
-    def user_get(self, user, region=None, zone=None, zone_region_prefix="client.radosgw"):
-        if region is not None and zone is not None:
+    def user_get(self, user, zonegroup=None, zone=None, zone_zonegroup_prefix="client.radosgw"):
+        if zonegroup is not None and zone is not None:
             cmd = ["sudo", "/bin/radosgw-admin", "user", "info", "--conf", "/etc/ceph/ceph.conf", "--uid", "%s" % user]
         else:
             cmd = ["/usr/bin/radosgw-admin", "user", "info", "--conf", "/etc/ceph/ceph.conf", "--uid", "%s" % user]
 
-        if region is not None and zone is not None:
+        if zonegroup is not None and zone is not None:
             cmd.append("-n")
             # NB: This should match '[client.radosgw...]' or something similar found in ceph.conf for the RGW section
-            cmd.append("%s.%s-%s" % (zone_region_prefix, region, zone))
+            cmd.append("%s.%s-%s" % (zone_zonegroup_prefix, zonegroup, zone))
 
         return call(cmd)
 
-    def user_keys_add(self, user, access_key=None, secret_key=None, region=None, zone=None, zone_region_prefix="client.radosgw"):
-        if region is not None and zone is not None:
+    def user_keys_add(self, user, access_key=None, secret_key=None, zonegroup=None, zone=None, zone_zonegroup_prefix="client.radosgw"):
+        if zonegroup is not None and zone is not None:
             cmd = ["sudo", "/usr/bin/radosgw-admin", "key", "create", "--conf", "/etc/ceph/ceph.conf", "--uid", "%s" % user, "--key-type", "s3"]
         else:
             cmd = ["/usr/bin/radosgw-admin", "key", "create", "--conf", "/etc/ceph/ceph.conf", "--uid", "%s" % user, "--key-type", "s3"]
@@ -109,41 +109,41 @@ class RGWWebServiceAPI(object):
         else:
             cmd.append("--gen-secret")
 
-        if region is not None and zone is not None:
+        if zonegroup is not None and zone is not None:
             cmd.append("-n")
             # NB: This should match '[client.radosgw...]' or something similar found in ceph.conf for the RGW section
-            cmd.append("%s.%s-%s" % (zone_region_prefix, region, zone))
+            cmd.append("%s.%s-%s" % (zone_zonegroup_prefix, zonegroup, zone))
 
         return call(cmd)
 
-    def user_quota_enable(self, user, region=None, zone=None, zone_region_prefix="client.radosgw"):
-        if region is not None and zone is not None:
+    def user_quota_enable(self, user, zonegroup=None, zone=None, zone_zonegroup_prefix="client.radosgw"):
+        if zonegroup is not None and zone is not None:
             cmd = ["sudo", "/bin/radosgw-admin", "quota", "enable", "--conf", "/etc/ceph/ceph.conf", "--uid", "%s" % user, "--quota-scope", "user"]
         else:
             cmd = ["/usr/bin/radosgw-admin", "quota", "enable", "--conf", "/etc/ceph/ceph.conf", "--uid", "%s" % user, "--quota-scope", "user"]
 
-        if region is not None and zone is not None:
+        if zonegroup is not None and zone is not None:
             cmd.append("-n")
             # NB: This should match '[client.radosgw...]' or something similar found in ceph.conf for the RGW section
-            cmd.append("%s.%s-%s" % (zone_region_prefix, region, zone))
+            cmd.append("%s.%s-%s" % (zone_zonegroup_prefix, zonegroup, zone))
 
         return call(cmd)
 
-    def user_quota_disable(self, user, region=None, zone=None, zone_region_prefix="client.radosgw"):
-        if region is not None and zone is not None:
+    def user_quota_disable(self, user, zonegroup=None, zone=None, zone_zonegroup_prefix="client.radosgw"):
+        if zonegroup is not None and zone is not None:
             cmd = ["sudo", "/bin/radosgw-admin", "quota", "disable", "--conf", "/etc/ceph/ceph.conf", "--uid", "%s" % user, "--quota-scope", "user"]
         else:
             cmd = ["/usr/bin/radosgw-admin", "quota", "disable", "--conf", "/etc/ceph/ceph.conf", "--uid", "%s" % user, "--quota-scope", "user"]
 
-        if region is not None and zone is not None:
+        if zonegroup is not None and zone is not None:
             cmd.append("-n")
             # NB: This should match '[client.radosgw...]' or something similar found in ceph.conf for the RGW section
-            cmd.append("%s.%s-%s" % (zone_region_prefix, region, zone))
+            cmd.append("%s.%s-%s" % (zone_zonegroup_prefix, zonegroup, zone))
 
         return call(cmd)
 
-    def user_quota_set(self, user, num, scope="user", qtype="size", region=None, zone=None, zone_region_prefix="client.radosgw"):
-        if region is not None and zone is not None:
+    def user_quota_set(self, user, num, scope="user", qtype="size", zonegroup=None, zone=None, zone_zonegroup_prefix="client.radosgw"):
+        if zonegroup is not None and zone is not None:
             cmd = ["sudo", "/bin/radosgw-admin", "quota", "set", "--conf", "/etc/ceph/ceph.conf", "--uid", "%s" % user, "--quota-scope", "%s" % scope]
         else:
             cmd = ["/usr/bin/radosgw-admin", "quota", "set", "--conf", "/etc/ceph/ceph.conf", "--uid", "%s" % user, "--quota-scope", "%s" % scope]
@@ -154,10 +154,10 @@ class RGWWebServiceAPI(object):
             cmd.append("--max-size")
         cmd.append("%s" % num)
 
-        if region is not None and zone is not None:
+        if zonegroup is not None and zone is not None:
             cmd.append("-n")
             # NB: This should match '[client.radosgw...]' or something similar found in ceph.conf for the RGW section
-            cmd.append("%s.%s-%s" % (zone_region_prefix, region, zone))
+            cmd.append("%s.%s-%s" % (zone_zonegroup_prefix, zonegroup, zone))
 
         return call(cmd)
 
@@ -210,7 +210,7 @@ def rgw_users_create(user):
     # Getting parameters
     # NB: Display Name is required
     display_name = request.args.get('display_name')
-    region = request.args.get('region')
+    zonegroup = request.args.get('zonegroup')
     zone = request.args.get('zone')
     access_key = request.args.get('access_key')
     secret_key = request.args.get('secret_key')
@@ -223,7 +223,7 @@ def rgw_users_create(user):
     # Json example
     # flask.jsonify(data_dict)
 
-    return flaskify(api.user_create, user, display_name=display_name, remote_addr=remote_addr, region=region, zone=zone, access_key=access_key, secret_key=secret_key, email=email)
+    return flaskify(api.user_create, user, display_name=display_name, remote_addr=remote_addr, zonegroup=zonegroup, zone=zone, access_key=access_key, secret_key=secret_key, email=email)
 
 
 @app.route('/v1/users/get/<user>', methods=['GET'])
@@ -231,10 +231,10 @@ def rgw_users_get(user):
     api = RGWWebServiceAPI()
 
     # Getting parameters
-    region = request.args.get('region')
+    zonegroup = request.args.get('zonegroup')
     zone = request.args.get('zone')
 
-    return flaskify(api.user_get, user, region=region, zone=zone)
+    return flaskify(api.user_get, user, zonegroup=zonegroup, zone=zone)
 
 
 @app.route('/v1/users/keys/add/<user>', methods=['PUT'])
@@ -244,13 +244,13 @@ def rgw_users_keys_add(user):
     # Getting parameters
     access_key = request.args.get('access_key')
     secret_key = request.args.get('secret_key')
-    region = request.args.get('region')
+    zonegroup = request.args.get('zonegroup')
     zone = request.args.get('zone')
 
     # Json example
     # flask.jsonify(data_dict)
 
-    return flaskify(api.user_keys_add, user, access_key=access_key, secret_key=secret_key, region=region, zone=zone)
+    return flaskify(api.user_keys_add, user, access_key=access_key, secret_key=secret_key, zonegroup=zonegroup, zone=zone)
 
 
 @app.route('/v1/users/quota/enable/<user>', methods=['PUT'])
@@ -258,13 +258,13 @@ def rgw_users_quota_enable(user):
     api = RGWWebServiceAPI()
 
     # Getting parameters
-    region = request.args.get('region')
+    zonegroup = request.args.get('zonegroup')
     zone = request.args.get('zone')
 
     # Json example
     # flask.jsonify(data_dict)
 
-    return flaskify(api.user_quota_enable, user, region=region, zone=zone)
+    return flaskify(api.user_quota_enable, user, zonegroup=zonegroup, zone=zone)
 
 
 @app.route('/v1/users/quota/disable/<user>', methods=['PUT'])
@@ -272,13 +272,13 @@ def rgw_users_quota_disable(user):
     api = RGWWebServiceAPI()
 
     # Getting parameters
-    region = request.args.get('region')
+    zonegroup = request.args.get('zonegroup')
     zone = request.args.get('zone')
 
     # Json example
     # flask.jsonify(data_dict)
 
-    return flaskify(api.user_quota_disable, user, region=region, zone=zone)
+    return flaskify(api.user_quota_disable, user, zonegroup=zonegroup, zone=zone)
 
 
 # NB: scope can be 'user' or 'bucket'
@@ -289,13 +289,13 @@ def rgw_users_quota_set(user, scope, qtype):
 
     # Getting parameters
     num = request.args.get('num')
-    region = request.args.get('region')
+    zonegroup = request.args.get('zonegroup')
     zone = request.args.get('zone')
 
     # Json example
     # flask.jsonify(data_dict)
 
-    return flaskify(api.user_quota_set, user, num, scope, qtype, region=region, zone=zone)
+    return flaskify(api.user_quota_set, user, num, scope, qtype, zonegroup=zonegroup, zone=zone)
 
 
 if __name__ == '__main__':

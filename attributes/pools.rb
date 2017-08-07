@@ -53,7 +53,9 @@ default['ceph']['pools']['radosgw']['federated_master_zone_port'] = 80
 # Default for federated_zone_instances is 1. If you would like to run multiple instances of radosgw per node then increase
 # the federated_zone_instances count. NOTE: When you do this, make sure if you use a load balancer that you account
 # for the additional instance(s). Also, there *MUST* always be at least 1 instance value (change the values if desired)
-default['ceph']['pools']['radosgw']['federated_zone_instances'] = [{ 'name' => 'inst1', 'port' => 8080, 'zonegroup' => '', 'url' => 's3.rgw.ceph.example.com', 'handles' => 5, 'threads' => 100 }]
+default['ceph']['pools']['radosgw']['federated_zone_instances'] = [
+  { 'name' => 'inst1', 'port' => 8080, 'zonegroup' => '', 'url' => 's3.rgw.ceph.example.com', 'handles' => 5, 'threads' => 100, 'log_meta' => true, 'log_data' => true, 'read_only' => false, 'bucket_index_max_shards' => 7 }
+]
 
 # These two values *must* be set in your wrapper cookbook if using federated zonegroup/zone. They will be the root pool
 # name used. For example, zonegroup - .us.rgw.root, zone - .us-east.rgw.root (these do not include instances).

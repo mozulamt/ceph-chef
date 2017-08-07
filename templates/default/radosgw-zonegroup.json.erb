@@ -26,8 +26,10 @@
           "endpoints": [
             "http:\/\/<%= zone['url'] %>:<%= zone['port'] %>\/"
           ],
-          "log_meta": "true",
-          "log_data": "true"
+          "log_meta": "<%= (zone['log_meta'] || true).to_s %>",
+          "log_data": "<%= (zone['log_data'] || true).to_s %>",
+          "bucket_index_max_shards": <%= zone['bucket_index_max_shards'] || 0 %>,
+          "read_only": "<%= (zone['read_only'] || false).to_s %>"
         }<% if index < @zones.size %>,<% end %>
   <% end %>
   ],

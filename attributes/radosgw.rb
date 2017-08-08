@@ -47,19 +47,25 @@ default['ceph']['radosgw']['rgw_webservice']['user'] = 'radosgw'
 # https://github.com/civetweb/civetweb/blob/master/docs/UserManual.md
 # Add the options to the single line of the 'frontends etc...'
 # NOTE: Change the number of default threads that civetweb uses per node - Default is 100 from civetweb
-default['ceph']['radosgw']['civetweb_num_threads'] = 100
-# Default
-default['ceph']['radosgw']['rgw_thread_pool'] = 100
-
-# NOTE: DO NOT append '.log' to these log files because the conf recipe adds it because of the possible use of federation.
-default['ceph']['radosgw']['civetweb_access_log_file'] = '/var/log/radosgw/civetweb.access'
-default['ceph']['radosgw']['civetweb_error_log_file'] = '/var/log/radosgw/civetweb.error'
+default['ceph']['radosgw']['civetweb']['num_threads'] = 100
 
 # What IP should civetweb bind to?
 # It treats empty string as '0.0.0.0', and binds IPv4-only.
 #default['ceph']['radosgw']['civetweb_bindip'] = ''
 # Bind to any address on IPv6 AND IPv4.
-default['ceph']['radosgw']['civetweb_bindip'] = '[::]'
+default['ceph']['radosgw']['civetweb']['bindip'] = '[::]'
+
+# You can pass any civetweb options, as long as they do not contain a comma.
+# If they contain a comma, you will trigger http://tracker.ceph.com/issues/20942
+default['ceph']['radosgw']['civetweb']['request_timeout_ms'] = '300000'
+
+
+# Default, this should match civetweb num_threads
+default['ceph']['radosgw']['rgw_thread_pool'] = 100
+
+# NOTE: DO NOT append '.log' to these log files because the conf recipe adds it because of the possible use of federation.
+default['ceph']['radosgw']['civetweb_access_log_file'] = '/var/log/radosgw/civetweb.access'
+default['ceph']['radosgw']['civetweb_error_log_file'] = '/var/log/radosgw/civetweb.error'
 
 # OpenStack Keystone specific
 # Will radosgw integrate with OpenStack Keystone - true/false

@@ -320,7 +320,7 @@
   <% civetweb['num_threads'] = node['ceph']['radosgw']['civetweb_num_threads'] if node['ceph']['radosgw']['civetweb_num_threads'] -%>
   <% civetweb['access_log_file'] = node['ceph']['radosgw']['civetweb_access_log_file'] + '.log' if node['ceph']['radosgw']['debug']['logs']['enable'] && node['ceph']['radosgw']['civetweb_access_log_file'] -%>
   <% civetweb['error_log_file'] = node['ceph']['radosgw']['civetweb_error_log_file'] + '.log' if node['ceph']['radosgw']['civetweb_error_log_file'] -%>
-  rgw frontends = civetweb <%= civetweb.map { |k,v| "#{k}=#{v}" }.join(' ') -%>
+  rgw frontends = civetweb <%= civetweb.map { |k,v| "#{k}=#{v}" }.join(' ') %>
   <% if node['ceph']['radosgw']['debug']['logs']['enable'] %>
   log file = /var/log/radosgw/$cluster.client.radosgw.log
   debug rgw = 1/5

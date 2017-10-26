@@ -246,12 +246,13 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         not_if "#{radosgw_admin_cmd} zonegroup get --rgw-zonegroup=#{inst['zonegroup']}"
       end
 
-      execute "zonegroup-map-set-#{inst['zonegroup']}" do
-        command <<-EOH
-          #{radosgw_admin_cmd} zonegroup-map set --infile #{zonegroup_map_file} --rgw-zonegroup=#{zonegroup}
-        EOH
-        not_if "#{radosgw_admin_cmd} zonegroup-map get | grep #{inst['zonegroup']}"
-      end
+	  # zonegroup-map was removed in 10.2.10
+      #execute "zonegroup-map-set-#{inst['zonegroup']}" do
+      #  command <<-EOH
+      #    #{radosgw_admin_cmd} zonegroup-map set --infile #{zonegroup_map_file} --rgw-zonegroup=#{zonegroup}
+      #  EOH
+      #  not_if "#{radosgw_admin_cmd} zonegroup-map get | grep #{inst['zonegroup']}"
+      #end
 
       # execute 'remove-default-zonegroup' do
       #  command lazy { "rados -p .#{inst['zonegroup']}.rgw.root rm zonegroup_info.default" }
@@ -273,9 +274,10 @@ if node['ceph']['pools']['radosgw']['federated_enable']
       end
 
       execute "create-zonegroup-defaults-#{inst['zonegroup']}" do
+		# zonegroup-map was removed in 10.2.10
+		# #{radosgw_admin_cmd} zonegroup-map update --rgw-zonegroup=#{zonegroup}
         command <<-EOH
           #{radosgw_admin_cmd} zonegroup default --rgw-zonegroup=#{zonegroup}
-          #{radosgw_admin_cmd} zonegroup-map update --rgw-zonegroup=#{zonegroup}
         EOH
       end
     end

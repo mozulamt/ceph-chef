@@ -18,7 +18,9 @@
 include_recipe 'ceph-chef'
 
 node['ceph']['radosgw']['packages'].each do |pck|
-  package pck
+  package pck do
+    version node['ceph']['exact_version'] if node['ceph']['exact_version']
+  end
 end
 
 platform_family = node['platform_family']

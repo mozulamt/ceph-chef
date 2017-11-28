@@ -18,7 +18,9 @@
 include_recipe 'ceph-chef'
 
 node['ceph']['cephfs']['packages'].each do |pck|
-  package pck
+  package pck do
+    version node['ceph']['exact_version'] if node['ceph']['exact_version']
+  end
 end
 
 # Update the fuse.ceph helper for pre-firefly

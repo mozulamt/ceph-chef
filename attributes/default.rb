@@ -55,6 +55,11 @@ default['ceph']['branch'] = 'stable' # Can be stable, testing or dev.
 # Major release version to install or gitbuilder branch
 # Must set this outside of this cookbook!
 # default['ceph']['version'] = 'jewel'
+#
+# Exact version within release to install
+# Must set this outside of this cookbook!
+# MUST be valid within node['ceph']['version']
+# default['ceph']['exact_version'] = '10.2.10'
 
 default['ceph']['init_style'] = case node['platform']
                                 when 'ubuntu'

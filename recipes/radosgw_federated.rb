@@ -221,7 +221,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
 
       zonegroup_file = "/etc/ceph/#{inst['zonegroup']}-#{inst['name']}-zonegroup.json"
       zonegroup_map_file = "/etc/ceph/#{inst['zonegroup']}-#{inst['name']}-zonegroup-map.json"
-      zonegroup = "#{inst['zonegroup']}-#{inst['name']}"
+      zonegroup = "#{inst['zonegroup']}"
       zone = "#{inst['zonegroup']}-#{inst['name']}"
     end
 

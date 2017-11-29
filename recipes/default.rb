@@ -25,6 +25,7 @@ include_recipe 'ceph-chef::conf'
 # Tools needed by cookbook
 node['ceph']['packages'].each do |pck|
   package pck do
+    action node['ceph']['package_action']
     version node['ceph']['exactversion'] if node['ceph']['exactversion']
   end
 end

@@ -61,6 +61,9 @@ default['ceph']['branch'] = 'stable' # Can be stable, testing or dev.
 # MUST be valid within node['ceph']['version']
 # default['ceph']['exactversion'] = '10.2.10'
 
+# What should the package action be?
+default['ceph']['package_action'] = :install
+
 default['ceph']['init_style'] = case node['platform']
                                 when 'ubuntu'
                                   'upstart'

@@ -19,6 +19,7 @@ include_recipe 'ceph-chef'
 
 node['ceph']['osd']['packages'].each do |pck|
   package pck do
+    action node['ceph']['package_action']
     version node['ceph']['exactversion'] if node['ceph']['exactversion']
   end
 end

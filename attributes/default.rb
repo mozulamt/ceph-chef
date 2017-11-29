@@ -129,3 +129,45 @@ when 'rhel', 'fedora'
 else
   default['ceph']['packages'] = []
 end
+
+# This is a complete list of packages that would get an exactversion suffix.
+# Without -dbg/-debug suffix.
+default['ceph']['versioned_packages'] = %w[
+  ceph
+  ceph-base
+  ceph-common
+  ceph-fuse
+  ceph-mds
+  ceph-mgr
+  ceph-mon
+  ceph-osd
+  ceph-resource-agents
+  ceph-test
+  libcephfs2
+  libcephfs-dev
+  libcephfs-java
+  libcephfs-jni
+  librados2
+  librados-dev
+  libradosstriper1
+  libradosstriper-dev
+  librbd1
+  librbd-dev
+  librgw2
+  librgw-dev
+  python3-ceph-argparse
+  python3-cephfs
+  python3-rados
+  python3-rbd
+  python3-rgw
+  python-ceph
+  python-cephfs
+  python-rados
+  python-rbd
+  python-rgw
+  radosgw
+  rados-objclass-dev
+  rbd-fuse
+  rbd-mirror
+  rbd-nbd
+]

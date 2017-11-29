@@ -24,9 +24,10 @@ include_recipe 'ceph-chef::conf'
 
 # Tools needed by cookbook
 node['ceph']['packages'].each do |pck|
+  v = ceph_exactversion(pck)
   package pck do
     action node['ceph']['package_action']
-    version node['ceph']['exactversion'] if node['ceph']['exactversion']
+    version v if v
   end
 end
 

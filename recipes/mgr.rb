@@ -41,7 +41,7 @@ if node['ceph']['mgr']['enable']
     command lazy { "ceph auth get-or-create mgr.#{node['hostname']} mon 'allow profile mgr' osd 'allow *' mds 'allow *' > #{keyring}" }
     user node['ceph']['owner']
     group node['ceph']['group']
-    only_if { ceph_chef_mgr_secret }
+    #only_if { ceph_chef_mgr_secret }
     not_if { ::File.size?(keyring) }
     sensitive true if Chef::Resource::Execute.method_defined? :sensitive
   end

@@ -16,6 +16,7 @@
 #
 
 include_recipe 'ceph-chef'
+include_recipe 'ceph-chef::mgr_install'
 
 # NOTE: Only run this recipe after Ceph is running and only on Mon nodes.
 
@@ -45,6 +46,7 @@ if node['ceph']['mgr']['enable']
     sensitive true if Chef::Resource::Execute.method_defined? :sensitive
   end
 
+  service_type = node['ceph']['mgr']['init_style']
   ruby_block 'mgr-finalize' do
     block do
       ['done', service_type].each do |ack|

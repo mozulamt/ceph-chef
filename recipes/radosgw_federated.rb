@@ -180,10 +180,10 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         }
       end
 
-      zonegroup_file = "/etc/ceph/#{inst['zonegroup']}-zonegroup.json"
-      zonegroup_map_file = "/etc/ceph/#{inst['zonegroup']}-zonegroup-map.json"
       zonegroup = (inst['zonegroup']).to_s
       zone = (inst['name']).to_s
+      zonegroup_file = "/etc/ceph/#{zonegroup}-zonegroup.json"
+      zonegroup_map_file = "/etc/ceph/#{zonegroup}-zonegroup-map.json"
     else
       template "/etc/ceph/#{inst['zonegroup']}-#{inst['name']}-zonegroup.json" do
         source 'radosgw-zonegroup.json.erb'
@@ -219,10 +219,10 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         not_if { ::File.size?("/etc/ceph/#{inst['zonegroup']}-#{inst['name']}-zonegroup-map.json") }
       end
 
-      zonegroup_file = "/etc/ceph/#{inst['zonegroup']}-#{inst['name']}-zonegroup.json"
-      zonegroup_map_file = "/etc/ceph/#{inst['zonegroup']}-#{inst['name']}-zonegroup-map.json"
       zonegroup = "#{inst['zonegroup']}"
       zone = "#{inst['zonegroup']}-#{inst['name']}"
+      zonegroup_file = "/etc/ceph/#{zone}-zonegroup.json"
+      zonegroup_map_file = "/etc/ceph/#{zone}-zonegroup-map.json"
     end
 
     if node['ceph']['pools']['radosgw']['federated_enable_zonegroups_zones']
@@ -230,8 +230,8 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         source 'radosgw-federated-zone.json.erb'
         variables lazy {
           {
-            :zonegroup => (inst['zonegroup']).to_s,
-            :zone => (inst['name']).to_s,
+            :zonegroup => (zonegroup).to_s,
+            :zone => (zone).to_s,
             :secret_key => '',
             :access_key => ''
           }
@@ -239,41 +239,41 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         not_if { ::File.size?("/etc/ceph/#{zone}-zone.json") }
       end
 
-      execute "zonegroup-set-#{inst['zonegroup']}" do
+      execute "zonegroup-set-#{zonegroup}" do
         command <<-EOH
           #{radosgw_admin_cmd} zonegroup set --infile=#{zonegroup_file} --rgw-zonegroup=#{zonegroup}
         EOH
-        not_if "#{radosgw_admin_cmd} zonegroup get --rgw-zonegroup=#{inst['zonegroup']}"
+		not_if "#{radosgw_admin_cmd} zonegroup get --rgw-zonegroup=#{zonegroup} |grep '\"name\": \"#{zonegroup}\""
       end
 
 	  # zonegroup-map was removed in 10.2.10
-      #execute "zonegroup-map-set-#{inst['zonegroup']}" do
+      #execute "zonegroup-map-set-#{zonegroup}" do
       #  command <<-EOH
       #    #{radosgw_admin_cmd} zonegroup-map set --infile #{zonegroup_map_file} --rgw-zonegroup=#{zonegroup}
       #  EOH
-      #  not_if "#{radosgw_admin_cmd} zonegroup-map get | grep #{inst['zonegroup']}"
+      #  not_if "#{radosgw_admin_cmd} zonegroup-map get | grep #{zonegroup}"
       #end
 
       # execute 'remove-default-zonegroup' do
-      #  command lazy { "rados -p .#{inst['zonegroup']}.rgw.root rm zonegroup_info.default" }
+      #  command lazy { "rados -p .#{zonegroup}.rgw.root rm zonegroup_info.default" }
       #  ignore_failure true
-      #  not_if "rados -p .#{inst['zonegroup']}.rgw.root ls | grep zonegroup_info.default"
+      #  not_if "rados -p .#{zonegroup}.rgw.root ls | grep zonegroup_info.default"
       # end
 
       # execute 'remove-default-zone' do
-      #  command lazy { "rados -p .#{inst['zonegroup']}-#{inst['name']}.rgw.root rm zone_info.default" }
+      #  command lazy { "rados -p .#{zone}.rgw.root rm zone_info.default" }
       #  ignore_failure true
-      #  not_if "rados -p .#{inst['zonegroup']}-#{inst['name']}.rgw.root ls | grep zone_info.default"
+      #  not_if "rados -p .#{zone}.rgw.root ls | grep zone_info.default"
       # end
 
-      execute "zone-set-#{inst['name']}" do
+      execute "zone-set-#{zone}" do
         command <<-EOH
-          #{radosgw_admin_cmd} zone set --rgw-zone=#{inst['zonegroup']}-#{inst['name']} --infile /etc/ceph/#{zone}-zone.json
+          #{radosgw_admin_cmd} zone set --rgw-zone=#{zone} --infile /etc/ceph/#{zone}-zone.json
         EOH
-        not_if "#{radosgw_admin_cmd} zone get --rgw-zone=#{inst['zonegroup']}-#{inst['name']}"
+        not_if "#{radosgw_admin_cmd} zone get --rgw-zone=#{zone} | |grep '\"name\": \"#{zone}\""
       end
 
-      execute "create-zonegroup-defaults-#{inst['zonegroup']}" do
+      execute "create-zonegroup-defaults-#{zonegroup}" do
 		# zonegroup-map was removed in 10.2.10
 		# #{radosgw_admin_cmd} zonegroup-map update --rgw-zonegroup=#{zonegroup}
         command <<-EOH
@@ -282,7 +282,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
       end
     end
 
-    # execute "update-zonegroupmap-#{inst['name']}" do
+    # execute "update-zonegroupmap-#{zone}" do
     #  command <<-EOH
     #    #{radosgw_admin_cmd} zonegroupmap update
     #  EOH
@@ -295,13 +295,13 @@ if node['ceph']['pools']['radosgw']['federated_enable']
     # communicate with each other for replication
 
     # This is only here as part of completeness. The service_type is not really needed because of defaults.
-    ruby_block "radosgw-finalize-#{inst['name']}" do
+    ruby_block "radosgw-finalize-#{zone}" do
       block do
         ['done', service_type].each do |ack|
-          ::File.open("/var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.#{inst['zonegroup']}-#{inst['name']}/#{ack}", 'w').close
+          ::File.open("/var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.#{zone}/#{ack}", 'w').close
         end
       end
-      not_if { ::File.file?("/var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.#{inst['zonegroup']}-#{inst['name']}/done") }
+      not_if { ::File.file?("/var/lib/ceph/radosgw/#{node['ceph']['cluster']}-radosgw.#{zone}/done") }
     end
   end
 end

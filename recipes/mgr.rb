@@ -57,7 +57,7 @@ if node['ceph']['mgr']['enable']
   end
 
   service 'ceph_mgr' do
-    case node['ceph']['radosgw']['init_style']
+    case node['ceph']['mgr']['init_style']
     when 'upstart'
       service_name 'ceph-mgr-all-starter'
       provider Chef::Provider::Service::Upstart

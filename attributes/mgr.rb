@@ -16,7 +16,7 @@
 
 include_attribute 'ceph-chef'
 
-default['ceph']['mgr']['init_style'] = node['init_style']
+default['ceph']['mgr']['init_style'] = node['ceph']['init_style']
 
 default['ceph']['mgr']['secret_file'] = '/etc/chef/secrets/ceph_chef_mgr'
 

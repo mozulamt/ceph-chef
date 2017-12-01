@@ -141,7 +141,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
       command <<-EOH
         #{radosgw_admin_cmd} realm create --rgw-realm=#{realm} --default
       EOH
-      only_if { node['ceph']['radosgw']['manual_federation'] == true }
+      only_if { node['ceph']['radosgw']['manual_federation'] == false }
       not_if "#{radosgw_admin_cmd} realm list | grep '\"#{realm}\"'"
     end
 
@@ -149,7 +149,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
     if node['ceph']['pools']['radosgw']['federated_multisite_replication'] == true
       template "/etc/ceph/#{inst['zonegroup']}-zonegroup.json" do
         source 'radosgw-zonegroup.json.erb'
-        only_if { node['ceph']['radosgw']['manual_federation'] == true }
+        only_if { node['ceph']['radosgw']['manual_federation'] == false }
         not_if { ::File.size?("/etc/ceph/#{inst['zonegroup']}-zonegroup.json") }
         variables lazy {
           {
@@ -167,7 +167,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
 
       template "/etc/ceph/#{inst['zonegroup']}-zonegroup-map.json" do
         source 'radosgw-zonegroup-map.json.erb'
-        only_if { node['ceph']['radosgw']['manual_federation'] == true }
+        only_if { node['ceph']['radosgw']['manual_federation'] == false }
         not_if { ::File.size?("/etc/ceph/#{inst['zonegroup']}-zonegroup-map.json") }
         variables lazy {
           {
@@ -190,7 +190,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
     else
       template "/etc/ceph/#{inst['zonegroup']}-#{inst['name']}-zonegroup.json" do
         source 'radosgw-zonegroup.json.erb'
-        only_if { node['ceph']['radosgw']['manual_federation'] == true }
+        only_if { node['ceph']['radosgw']['manual_federation'] == false }
         not_if { ::File.size?("/etc/ceph/#{inst['zonegroup']}-#{inst['name']}-zonegroup.json") }
         variables lazy {
           {
@@ -208,7 +208,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
 
       template "/etc/ceph/#{inst['zonegroup']}-#{inst['name']}-zonegroup-map.json" do
         source 'radosgw-zonegroup-map.json.erb'
-        only_if { node['ceph']['radosgw']['manual_federation'] == true }
+        only_if { node['ceph']['radosgw']['manual_federation'] == false }
         not_if { ::File.size?("/etc/ceph/#{inst['zonegroup']}-#{inst['name']}-zonegroup-map.json") }
         variables lazy {
           {
@@ -233,7 +233,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
     if node['ceph']['pools']['radosgw']['federated_enable_zonegroups_zones']
       template "/etc/ceph/#{zone}-zone.json" do
         source 'radosgw-federated-zone.json.erb'
-        only_if { node['ceph']['radosgw']['manual_federation'] == true }
+        only_if { node['ceph']['radosgw']['manual_federation'] == false }
         not_if { ::File.size?("/etc/ceph/#{zone}-zone.json") }
         variables lazy {
           {
@@ -249,7 +249,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         command <<-EOH
           #{radosgw_admin_cmd} zonegroup set --infile=#{zonegroup_file} --rgw-zonegroup=#{zonegroup}
         EOH
-        only_if { node['ceph']['radosgw']['manual_federation'] == true }
+        only_if { node['ceph']['radosgw']['manual_federation'] == false }
         not_if "#{radosgw_admin_cmd} zonegroup get --rgw-zonegroup=#{zonegroup} |grep '\"name\": \"#{zonegroup}\""
       end
 
@@ -258,21 +258,21 @@ if node['ceph']['pools']['radosgw']['federated_enable']
       #  command <<-EOH
       #    #{radosgw_admin_cmd} zonegroup-map set --infile #{zonegroup_map_file} --rgw-zonegroup=#{zonegroup}
       #  EOH
-      #  only_if { node['ceph']['radosgw']['manual_federation'] == true }
+      #  only_if { node['ceph']['radosgw']['manual_federation'] == false }
       #  not_if "#{radosgw_admin_cmd} zonegroup-map get | grep #{zonegroup}"
       #end
 
       # execute 'remove-default-zonegroup' do
       #  command lazy { "rados -p .#{zonegroup}.rgw.root rm zonegroup_info.default" }
       #  ignore_failure true
-      #  only_if { node['ceph']['radosgw']['manual_federation'] == true }
+      #  only_if { node['ceph']['radosgw']['manual_federation'] == false }
       #  not_if "rados -p .#{zonegroup}.rgw.root ls | grep zonegroup_info.default"
       # end
 
       # execute 'remove-default-zone' do
       #  command lazy { "rados -p .#{zone}.rgw.root rm zone_info.default" }
       #  ignore_failure true
-      #  only_if { node['ceph']['radosgw']['manual_federation'] == true }
+      #  only_if { node['ceph']['radosgw']['manual_federation'] == false }
       #  not_if "rados -p .#{zone}.rgw.root ls | grep zone_info.default"
       # end
 
@@ -280,7 +280,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         command <<-EOH
           #{radosgw_admin_cmd} zone set --rgw-zone=#{zone} --infile /etc/ceph/#{zone}-zone.json
         EOH
-        only_if { node['ceph']['radosgw']['manual_federation'] == true }
+        only_if { node['ceph']['radosgw']['manual_federation'] == false }
         not_if "#{radosgw_admin_cmd} zone get --rgw-zone=#{zone} | |grep '\"name\": \"#{zone}\""
       end
 
@@ -290,7 +290,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
         command <<-EOH
           #{radosgw_admin_cmd} zonegroup default --rgw-zonegroup=#{zonegroup}
         EOH
-        only_if { node['ceph']['radosgw']['manual_federation'] == true }
+        only_if { node['ceph']['radosgw']['manual_federation'] == false }
       end
     end
 
@@ -298,7 +298,7 @@ if node['ceph']['pools']['radosgw']['federated_enable']
     #  command <<-EOH
     #    #{radosgw_admin_cmd} zonegroupmap update
     #  EOH
-    #  only_if { node['ceph']['radosgw']['manual_federation'] == true }
+    #  only_if { node['ceph']['radosgw']['manual_federation'] == false }
     # end
 
     # FUTURE: Update the keys for the zones. This will allow each one to sync with the other.

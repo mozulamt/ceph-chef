@@ -111,12 +111,15 @@ else
 end
 
 # If you have a complex federation setup, you might not want this Cookbook to
-# apply the JSON for realm/zonegroup/zones.
-# If so, set this attribute to FALSE.
+# generate or apply the JSON for realm/zonegroup/zones.
+#
+# If so, set this attribute to TRUE.
+#
 # It will not generate the json files OR try to run radosgw-admin commands
 # related to realms, zones, zonegroups.
 # The rest of the opinionated choices made by this Cookbook for the NAMING of
 # zonegroups/zones will still be made, and will impact the rgw ceph.conf lines.
+#
 # This is particularly useful to bring up secondary zonegroup/zones, where you
 # start by pulling data from the primary.
-default['ceph']['radosgw']['manual_federation'] = true
+default['ceph']['radosgw']['manual_federation'] = false

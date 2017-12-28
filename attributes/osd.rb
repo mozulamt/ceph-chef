@@ -20,7 +20,12 @@ include_attribute 'ceph-chef'
 # The default is everything on the same OS
 default['ceph']['osd']['init_style'] = node['ceph']['init_style']
 
+<<<<<<< HEAD
 default['ceph']['osd']['store'] = 'bluestore' # By default use bluestore
+||||||| merged common ancestors
+=======
+default['ceph']['osd']['objectstore'] = nil # Use Ceph default objectstore type, other options: filestore, bluestore (Kraken & newer)
+>>>>>>> a196daf8d95651563f0a65973962823a98d7c5fb
 default['ceph']['osd']['dmcrypt'] = false  # By default don't encrypt osds at rest
 default['ceph']['osd']['fs_type'] = 'xfs'  # xfs, ext4, btrfs
 

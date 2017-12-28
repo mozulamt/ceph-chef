@@ -39,10 +39,8 @@ if node['ceph']['osd']['add']
       next
     end
 
-    # The default backend store for Luminous is bluestore to specify another
-    # OSD storage mechanism the 'backendstore' attribute need to be set.
-    # More options can be added here as they become available.
-    store = osd_device['backendstore'] == 'filestore' ? '--filestore' : ''
+    # objectstore type
+    store = osd_objectstore(osd_device['objectstore'] || node['ceph']['osd']['objectstore'] || nil)
     # if the 'encrypted' attribute is true then apply flag. This will encrypt the data at rest.
     # IMPORTANT: More work needs to be done on solid key management for very high security environments.
     dmcrypt = osd_device['encrypted'] == true ? '--dmcrypt' : ''

@@ -57,3 +57,20 @@ def ceph_exactversion(pkg)
     end
   end
 end
+
+# The default backend store for Luminous is bluestore to specify another
+# OSD storage mechanism the 'objectstore' attribute need to be set.
+# More options can be added here as they become available.
+def osd_objectstore(store)
+  case store
+  when nil
+    # allow Ceph default to be used
+    return ''
+  when 'bluestore', 'filestore'
+    # allow specific known stores
+  else
+    # allow everything else, but warn
+    Chef::Log.warn("Unknown OSD objectstore: #{store}, trying to guess")
+  end
+  return "--#{store}"
+end

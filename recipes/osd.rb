@@ -102,6 +102,10 @@ if node['ceph']['osd']['devices']
       next
     end
 
+    # The default backend store for Luminous is bluestore to specify another
+    # OSD storage mechanism the 'backendstore' attribute need to be set.
+    # More options can be added here as they become available.
+    store = osd_device['backendstore'] == 'filestore' ? '--filestore' : ''
     # if the 'encrypted' attribute is true then apply flag. This will encrypt the data at rest.
     # IMPORTANT: More work needs to be done on solid key management for very high security environments.
     dmcrypt = osd_device['encrypted'] == true ? '--dmcrypt' : ''
@@ -144,7 +148,7 @@ if node['ceph']['osd']['devices']
         f1=$(mktemp --tmpdir ceph-disk-prepare.1.XXXXXXXXXX)
         f2=$(mktemp --tmpdir ceph-disk-prepare.2.XXXXXXXXXX)
         test -e /sys/block/$data_nodev && ceph-disk list $data_nodev | tee $f1
-        ceph-disk -v prepare --cluster #{node['ceph']['cluster']} #{dmcrypt} --fs-type #{node['ceph']['osd']['fs_type']} $data #{osd_device['journal']}
+        ceph-disk -v prepare --cluster #{node['ceph']['cluster']} #{store} #{dmcrypt} --fs-type #{node['ceph']['osd']['fs_type']} $data #{osd_device['journal']}
         echo "ceph-disk AFTER"
         test -e /sys/block/$data_nodev && ceph-disk list $data_nodev | tee $f2
         # Do a trivial compare, find the only new line that matches 'ceph data'

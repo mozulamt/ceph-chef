@@ -20,6 +20,7 @@ include_attribute 'ceph-chef'
 # The default is everything on the same OS
 default['ceph']['osd']['init_style'] = node['ceph']['init_style']
 
+default['ceph']['osd']['store'] = 'bluestore' # By default use bluestore
 default['ceph']['osd']['dmcrypt'] = false  # By default don't encrypt osds at rest
 default['ceph']['osd']['fs_type'] = 'xfs'  # xfs, ext4, btrfs
 
